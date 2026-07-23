@@ -1,0 +1,104 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-fog);
+  padding: var(--space-6);
+}
+
+.wrapper {
+  width: 100%;
+  max-width: 440px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.logoNeedle {
+  color: var(--color-ember-amber);
+  font-size: var(--text-2xl);
+}
+
+.brandTitle {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--color-ink-navy);
+}
+
+.brandSubtitle {
+  font-size: var(--text-sm);
+  color: var(--color-ink-navy-60);
+  margin-top: var(--space-1);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.formTitle {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--color-ink-navy);
+  margin: 0;
+  text-align: center;
+}
+
+.errorBanner {
+  background: var(--color-alert-coral-light);
+  color: var(--color-alert-coral);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.loadingNeedle {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-2) 0;
+}
+
+.footer {
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--color-ink-navy-60);
+  margin-top: var(--space-2);
+}
+
+.link {
+  color: var(--color-ember-amber);
+  font-weight: 600;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.adminLinkRow {
+  text-align: center;
+  border-top: 1px solid var(--color-fog-dark);
+  padding-top: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.adminLink {
+  font-size: var(--text-xs);
+  color: var(--color-ink-navy-60);
+  font-family: var(--font-mono);
+}
+
+.adminLink:hover {
+  color: var(--color-ink-navy);
+}

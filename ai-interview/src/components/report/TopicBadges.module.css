@@ -1,0 +1,41 @@
+.container {
+  margin-top: var(--space-2);
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-ink-navy);
+  margin-bottom: var(--space-4);
+}
+
+.icon {
+  font-size: var(--text-lg);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.badge {
+  padding: var(--space-2) var(--space-4);
+  border: 1.5px solid var(--color-ink-navy-30);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  color: var(--color-ink-navy);
+  background: var(--color-white);
+  cursor: default;
+  transition: all var(--duration-fast) var(--ease-out);
+  animation: fade-in-up var(--duration-normal) var(--ease-out) both;
+}
+
+.badge:hover {
+  background: var(--color-ember-amber-light);
+  border-color: var(--color-ember-amber);
+  color: var(--color-ink-navy);
+}

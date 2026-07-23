@@ -1,0 +1,132 @@
+.reportPage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.loadingContainer {
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  color: var(--color-ink-navy-60);
+}
+
+/* === TOP HEADER === */
+.topHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tag {
+  font-size: var(--text-xs);
+  color: var(--color-ember-amber);
+  letter-spacing: 0.1em;
+}
+
+.title {
+  font-size: var(--text-3xl);
+  color: var(--color-ink-navy);
+  margin: var(--space-1) 0;
+}
+
+.metaText {
+  font-size: var(--text-sm);
+  color: var(--color-ink-navy-60);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* === OVERALL CARD === */
+.overallCard {
+  background: var(--color-white);
+  border: 1px solid var(--color-fog-darker);
+}
+
+.overallContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
+.overallLeft {
+  max-width: 540px;
+}
+
+.overallTag {
+  font-size: var(--text-xs);
+  color: var(--color-ink-navy-60);
+  letter-spacing: 0.08em;
+}
+
+.overallHeading {
+  font-size: var(--text-2xl);
+  color: var(--color-ink-navy);
+  margin: var(--space-2) 0;
+}
+
+.overallDesc {
+  font-size: var(--text-sm);
+  color: var(--color-ink-navy-60);
+  line-height: 1.6;
+}
+
+.needleBox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* === RINGS SECTION === */
+.ringsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sectionHeading {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-ink-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ringsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+}
+
+/* === FEEDBACK GRID === */
+.feedbackGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6);
+}
+
+@media (max-width: 1024px) {
+  .overallContent {
+    flex-direction: column;
+    text-align: center;
+  }
+  .ringsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .feedbackGrid {
+    grid-template-columns: 1fr;
+  }
+  .topHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+}

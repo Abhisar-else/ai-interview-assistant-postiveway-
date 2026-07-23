@@ -1,0 +1,232 @@
+.adminPage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.loadingContainer {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  color: var(--color-ink-navy-60);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.tag {
+  font-size: var(--text-xs);
+  color: var(--color-ember-amber);
+  letter-spacing: 0.1em;
+}
+
+.title {
+  font-size: var(--text-3xl);
+  color: var(--color-ink-navy);
+  margin: var(--space-1) 0;
+}
+
+.sub {
+  font-size: var(--text-sm);
+  color: var(--color-ink-navy-60);
+}
+
+/* === TABS === */
+.tabs {
+  display: flex;
+  gap: var(--space-2);
+  border-bottom: 2px solid var(--color-fog-darker);
+  padding-bottom: 2px;
+}
+
+.tab {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink-navy-60);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -4px;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.tab:hover {
+  color: var(--color-ink-navy);
+}
+
+.activeTab {
+  color: var(--color-ink-navy);
+  border-bottom-color: var(--color-ember-amber);
+}
+
+/* === TAB CONTENT === */
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* === METRICS GRID === */
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+}
+
+.metricLabel {
+  font-size: var(--text-xs);
+  color: var(--color-ink-navy-60);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metricVal {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--color-ink-navy);
+  margin: var(--space-1) 0;
+}
+
+.metricTrend {
+  font-size: var(--text-xs);
+  color: var(--color-ink-navy-60);
+}
+
+.avgScoreRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+/* === OVERVIEW GRID === */
+.overviewGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+}
+
+.roleBarList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.roleBarItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.roleBarLabel {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-sm);
+  color: var(--color-ink-navy);
+}
+
+.roleTrack {
+  height: 8px;
+  background: var(--color-fog);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.roleFill {
+  height: 100%;
+  background: var(--color-ink-navy);
+  border-radius: var(--radius-full);
+}
+
+/* === TABLES === */
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--text-sm);
+}
+
+.table th {
+  padding: var(--space-3) var(--space-4);
+  font-weight: 600;
+  color: var(--color-ink-navy-60);
+  border-bottom: 1px solid var(--color-fog-darker);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+}
+
+.table td {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-fog-dark);
+}
+
+.userCell {
+  font-weight: 600;
+  color: var(--color-ink-navy);
+}
+
+/* === CATEGORY MANAGEMENT === */
+.catActions {
+  margin-bottom: var(--space-4);
+}
+
+.userSearchRow {
+  margin-bottom: var(--space-4);
+  max-width: 400px;
+}
+
+/* === MODAL FORM === */
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.modalGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.modalLabel {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-ink-navy);
+}
+
+.modalSelect {
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  background: var(--color-fog);
+  border: 1.5px solid var(--color-fog-darker);
+  border-radius: var(--radius-md);
+  outline: none;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+@media (max-width: 1024px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+  .overviewGrid {
+    grid-template-columns: 1fr;
+  }
+}
