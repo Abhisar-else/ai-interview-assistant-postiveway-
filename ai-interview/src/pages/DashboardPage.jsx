@@ -42,7 +42,15 @@ export default function DashboardPage() {
 
   const completedSessions = sessions.filter((s) => s.status === 'completed');
   const latestReportSession = completedSessions[0];
-  const latestScore = latestReportSession ? 78 : 0; // Mock score or computed score
+  const scoredSessions = completedSessions.filter((s) => s.overall_score != null);
+
+const latestScore = scoredSessions.length > 0 
+  ? Math.round(scoredSessions[0].overall_score) 
+  : null;
+
+const highestScore = scoredSessions.length > 0
+  ? Math.round(Math.max(...scoredSessions.map((s) => s.overall_score)))
+  : null;
 
   if (loading) {
     return (
@@ -74,7 +82,7 @@ export default function DashboardPage() {
         <Card className={styles.needleCard} padding="md">
           <h3 className={styles.cardHeaderTitle}>Latest Overall Score</h3>
           <div className={styles.needleWrapper}>
-            {completedSessions.length > 0 ? (
+            {latestScore !== null ?  (
               <ConfidenceNeedle value={latestScore} size="md" label="Last Session Performance" />
             ) : (
               <div className={styles.noScore}>
@@ -102,7 +110,7 @@ export default function DashboardPage() {
             <div className={styles.statBox}>
               <span className={styles.statLabel}>Highest Score</span>
               <span className={`${styles.statValue} data-text`}>
-                {completedSessions.length > 0 ? '85/100' : 'N/A'}
+                {highestScore !== null ? `${highestScore}/100` : 'N/A'}
               </span>
             </div>
           </div>
