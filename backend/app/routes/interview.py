@@ -166,7 +166,21 @@ def get_interview_history(
     sessions = db.query(InterviewSession).filter(
         InterviewSession.user_id == current_user["id"]
     ).order_by(InterviewSession.started_at.desc()).all()
-    return sessions
+    result = []
+for s in sessions:
+    report = db.query(InterviewReport).filter(InterviewReport.session_id == s.id).first()
+    result.append({
+        "id": s.id,
+        "job_role": s.job_role,
+        "interview_type": s.interview_type,
+        "difficulty": s.difficulty,
+        "status": s.status,
+        "transcript": s.transcript,
+        "started_at": s.started_at,
+        "completed_at": s.completed_at,
+        "overall_score": float(report.overall_score) if report else None,
+    })
+return result
 
 @router.get("/{session_id}")
 def get_session_by_id(
