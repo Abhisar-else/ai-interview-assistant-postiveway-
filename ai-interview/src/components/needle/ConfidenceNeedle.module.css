@@ -1,0 +1,76 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.svg {
+  overflow: visible;
+}
+
+/* --- Needle animation --- */
+.needle {
+  transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.needleThinking {
+  animation: needle-oscillate 2s ease-in-out infinite;
+}
+
+/* --- Thinking arc glow --- */
+.thinkingArc {
+  animation: thinking-arc-rotate 2s linear infinite, amber-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes thinking-arc-rotate {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: calc(var(--circumference, 200) * -2); }
+}
+
+/* --- Score value --- */
+.valueContainer {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  margin-top: var(--space-1);
+}
+
+.value {
+  font-weight: 700;
+  line-height: 1;
+}
+
+.suffix {
+  font-size: 0.5em;
+  color: var(--color-ink-navy-60);
+}
+
+/* --- Size variants --- */
+.sm .value {
+  font-size: var(--text-lg);
+}
+
+.md .value {
+  font-size: var(--text-3xl);
+}
+
+.lg .value {
+  font-size: var(--text-5xl);
+}
+
+/* --- Thinking label --- */
+.thinkingLabel {
+  font-size: var(--text-sm);
+  color: var(--color-ember-amber);
+  animation: amber-pulse 1.5s ease-in-out infinite;
+  margin-top: var(--space-1);
+}
+
+/* --- Label --- */
+.label {
+  font-size: var(--text-sm);
+  color: var(--color-ink-navy-60);
+  text-align: center;
+  margin-top: var(--space-1);
+}

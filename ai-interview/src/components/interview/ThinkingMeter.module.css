@@ -1,0 +1,44 @@
+.meter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  width: 36px;
+  padding: var(--space-4) var(--space-1);
+  transition: opacity var(--duration-slow) var(--ease-out);
+}
+
+.idle {
+  opacity: 0.2;
+}
+
+.active {
+  opacity: 1;
+}
+
+.needle {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bar {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 3px;
+  flex: 1;
+}
+
+.segment {
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--color-fog-darker);
+  transition: background var(--duration-fast) var(--ease-out);
+}
+
+.active .segment {
+  background: var(--color-ember-amber);
+  animation: amber-pulse 1.5s ease-in-out infinite;
+}

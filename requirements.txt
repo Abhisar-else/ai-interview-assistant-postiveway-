@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+alembic
+pydantic
+pydantic-settings
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt==4.0.1  # passlib is incompatible with bcrypt>=4.1 (ValueError on every hash/verify call)
+python-multipart
+pdfplumber
+python-dotenv
+google-generativeai
+openai
