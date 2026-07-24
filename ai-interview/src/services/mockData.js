@@ -4,8 +4,8 @@
 
 const MOCK_USER = {
   id: 1,
-  name: 'Vinod Sharma',
-  email: 'vinod@example.com',
+  name: 'siddhant purohit',
+  email: 'siddhant@example.com',
   phone: '+91 98765 43210',
   created_at: '2026-07-15T10:30:00Z',
 };
@@ -23,7 +23,7 @@ const MOCK_RESUME = {
   file_path: 'uploads/resumes/vinod_resume.pdf',
   uploaded_at: '2026-07-16T14:20:00Z',
   parsed_json: {
-    name: 'Vinod Sharma',
+    name: 'siddhant purohit',
     skills: ['React', 'JavaScript', 'TypeScript', 'Node.js', 'Python', 'FastAPI', 'PostgreSQL', 'MongoDB', 'Docker', 'Git'],
     projects: [
       {
@@ -357,4 +357,31 @@ function getFollowUpQuestion() {
   const q = followUpQuestions[questionIndex % followUpQuestions.length];
   questionIndex++;
   return q;
+}
+export async function createCategory(category) {
+  await delay(300);
+  const newCat = {
+    id: Math.max(0, ...MOCK_CATEGORIES.map((c) => c.id)) + 1,
+    job_role: category.job_role,
+    interview_type: category.interview_type,
+    difficulty: category.difficulty,
+    active: true,
+  };
+  MOCK_CATEGORIES.push(newCat);
+  return newCat;
+}
+
+export async function updateCategory(id, updates) {
+  await delay(300);
+  const cat = MOCK_CATEGORIES.find((c) => c.id === id);
+  if (!cat) throw new Error('Category not found');
+  Object.assign(cat, updates);
+  return cat;
+}
+
+export async function deleteCategory(id) {
+  await delay(300);
+  const idx = MOCK_CATEGORIES.findIndex((c) => c.id === id);
+  if (idx !== -1) MOCK_CATEGORIES.splice(idx, 1);
+  return { id };
 }
