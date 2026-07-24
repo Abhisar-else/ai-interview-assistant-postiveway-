@@ -270,6 +270,13 @@ export default function AdminDashboardPage() {
                         >
                           {cat.active ? 'Disable' : 'Enable'}
                         </Button>
+<Button
+    variant="ghost"
+    size="sm"
+    onClick={() => handleDeleteCategory(cat.id)}
+  >
+    Delete
+  </Button>
                       </td>
                     </tr>
                   ))}
