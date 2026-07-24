@@ -108,6 +108,24 @@ export async function getCategories() {
   return data;
 }
 
+export async function createCategory(category) {
+  if (USE_MOCK) return mock.createCategory(category);
+  const { data } = await api.post('/admin/categories', category);
+  return data;
+}
+
+export async function updateCategory(id, updates) {
+  if (USE_MOCK) return mock.updateCategory(id, updates);
+  const { data } = await api.put(`/admin/categories/${id}`, updates);
+  return data;
+}
+
+export async function deleteCategory(id) {
+  if (USE_MOCK) return mock.deleteCategory(id);
+  await api.delete(`/admin/categories/${id}`);
+  return { id };
+}
+
 // --- Admin ---
 export async function getAdminDashboard() {
   if (USE_MOCK) return mock.getAdminDashboard();
