@@ -14,6 +14,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [catActionError, setCatActionError] = useState('');
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('overview'); // overview | categories | users
@@ -44,26 +45,45 @@ export default function AdminDashboardPage() {
     loadAdminData();
   }, []);
 
-  const handleAddCategory = (e) => {
-    e.preventDefault();
-    if (!newRole) return;
-    const newCat = {
-      id: Date.now(),
+  const handleAddCategory = async (e) => {
+  e.preventDefault();
+  if (!newRole) return;
+  try {
+    const created = await api.createCategory({
       job_role: newRole,
       interview_type: newType,
       difficulty: newDifficulty,
-      active: true,
-    };
-    setCategories([...categories, newCat]);
+    });
+    setCategories([...categories, created]);
     setShowCategoryModal(false);
     setNewRole('');
-  };
+    setCatActionError('');
+  } catch (err) {
+    setCatActionError('Failed to create category. Please try again.');
+  }
+};
 
-  const handleToggleCategory = (catId) => {
-    setCategories(
-      categories.map((c) => (c.id === catId ? { ...c, active: !c.active } : c))
-    );
-  };
+  const handleToggleCategory = async (catId) => {
+  const target = categories.find((c) => c.id === catId);
+  if (!target) return;
+  try {
+    const updated = await api.updateCategory(catId, { active: !target.active });
+    setCategories(categories.map((c) => (c.id === catId ? updated : c)));
+    setCatActionError('');
+  } catch (err) {
+    setCatActionError('Failed to update category. Please try again.');
+  }
+};
+
+ const handleDeleteCategory = async (catId) => {
+  try {
+    await api.deleteCategory(catId);
+    setCategories(categories.filter((c) => c.id !== catId));
+    setCatActionError('');
+  } catch (err) {
+    setCatActionError('Failed to delete category. Please try again.');
+  }
+};
 
   const filteredUsers = users.filter(
     (u) =>
