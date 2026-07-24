@@ -44,7 +44,7 @@ def call_llm(system_prompt: str, user_prompt: str, json_only: bool = False) -> s
     return get_fallback_llm_response(system_prompt, user_prompt, json_only)
 
 def get_fallback_llm_response(system_prompt: str, user_prompt: str, json_only: bool) -> str:
-    if "resume" in system_prompt.lower() or "convert raw resume" in system_prompt.lower():
+    if "convert raw resume text into structured json" in system_prompt.lower():
         return json.dumps({
             "name": "Candidate",
             "skills": ["JavaScript", "React", "Python", "FastAPI", "PostgreSQL", "Git", "REST APIs"],

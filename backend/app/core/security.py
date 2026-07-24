@@ -41,10 +41,15 @@ def decode_token(token: str) -> Dict[str, Any]:
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     payload = decode_token(token)
-    user_id: int = payload.get("sub")
+    sub = payload.get("sub")
     role: str = payload.get("role", "candidate")
 
-    if user_id is None:
+    if sub is None:
+        raise HTTPException(status_code=401, detail="Invalid token subject")
+
+    try:
+        user_id = int(sub)
+    except (TypeError, ValueError):
         raise HTTPException(status_code=401, detail="Invalid token subject")
 
     if role == "admin":

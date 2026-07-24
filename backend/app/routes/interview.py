@@ -188,7 +188,10 @@ def get_session_report(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    session = db.query(InterviewSession).filter(InterviewSession.id == session_id).first()
+    session = db.query(InterviewSession).filter(
+        InterviewSession.id == session_id,
+        InterviewSession.user_id == current_user["id"]
+    ).first()
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 

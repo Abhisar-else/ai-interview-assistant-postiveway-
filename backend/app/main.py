@@ -1,7 +1,6 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.core.db import engine, Base
@@ -22,7 +21,6 @@ origins = [
     settings.FRONTEND_ORIGIN,
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "*"
 ]
 
 app.add_middleware(
@@ -33,9 +31,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Ensure upload directory exists
+# Ensure upload directory exists.
+# NOTE: intentionally NOT mounted as public static files — resumes contain PII
+# (name/phone/email) and must only be served through the authenticated
+# /api/resume/file route (see routes/candidate.py), which checks ownership.
 os.makedirs(settings.RESUME_UPLOAD_DIR, exist_ok=True)
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Mount Routers
 app.include_router(auth.router, prefix=settings.API_PREFIX)
