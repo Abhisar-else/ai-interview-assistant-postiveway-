@@ -23,7 +23,7 @@ def register_candidate(user_data: UserRegister, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    token = create_access_token({"sub": new_user.id, "role": "candidate"})
+    token = create_access_token({"sub": str(new_user.id), "role": "candidate"})
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -36,7 +36,7 @@ def login_candidate(credentials: UserLogin, db: Session = Depends(get_db)):
     if not user or not verify_password(credentials.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    token = create_access_token({"sub": user.id, "role": "candidate"})
+    token = create_access_token({"sub": str(user.id), "role": "candidate"})
     return {
         "access_token": token,
         "token_type": "bearer",
@@ -47,21 +47,10 @@ def login_candidate(credentials: UserLogin, db: Session = Depends(get_db)):
 def login_admin(credentials: UserLogin, db: Session = Depends(get_db)):
     admin = db.query(Admin).filter(Admin.email == credentials.email).first()
 
-    # Seed default admin if table is empty on first login attempt
-    if not admin and credentials.email == "admin@interviewsim.ai":
-        admin = Admin(
-            name="Admin",
-            email="admin@interviewsim.ai",
-            password_hash=get_password_hash("password")
-        )
-        db.add(admin)
-        db.commit()
-        db.refresh(admin)
-
     if not admin or not verify_password(credentials.password, admin.password_hash):
         raise HTTPException(status_code=401, detail="Invalid admin credentials")
 
-    token = create_access_token({"sub": admin.id, "role": "admin"})
+    token = create_access_token({"sub": str(admin.id), "role": "admin"})
     return {
         "access_token": token,
         "token_type": "bearer",

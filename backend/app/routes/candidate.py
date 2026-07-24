@@ -1,5 +1,7 @@
 import os
+import uuid
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.core.security import get_current_user
@@ -20,7 +22,10 @@ async def upload_resume(
         raise HTTPException(status_code=400, detail="Only PDF format files are supported.")
 
     os.makedirs(settings.RESUME_UPLOAD_DIR, exist_ok=True)
-    file_path = os.path.join(settings.RESUME_UPLOAD_DIR, f"user_{current_user['id']}_{file.filename}")
+    # Server-generated filename — never build paths from client-supplied
+    # file.filename (a crafted "../../" filename can escape RESUME_UPLOAD_DIR).
+    safe_filename = f"user_{current_user['id']}_{uuid.uuid4().hex}.pdf"
+    file_path = os.path.join(settings.RESUME_UPLOAD_DIR, safe_filename)
 
     with open(file_path, "wb") as f:
         content = await file.read()
@@ -65,3 +70,20 @@ def get_user_resume(
         "parsed_json": resume.parsed_json,
         "uploaded_at": resume.uploaded_at
     }
+
+@router.get("/resume/file")
+def get_resume_file(
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Serves the candidate's own resume PDF. Replaces the old public
+    /uploads static mount — ownership is checked here instead of relying
+    on an unguessable filename."""
+    resume = db.query(Resume).filter(Resume.user_id == current_user["id"]).first()
+    if not resume or not os.path.exists(resume.file_path):
+        raise HTTPException(status_code=404, detail="No resume file found")
+    return FileResponse(
+        resume.file_path,
+        media_type="application/pdf",
+        filename=os.path.basename(resume.file_path),
+    )

@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     API_PREFIX: str = "/api"
 
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./interview_simulator.db")
-    JWT_SECRET: str = os.getenv("JWT_SECRET", "ai_interview_simulator_secret_key_2026")
+    JWT_SECRET: str = os.getenv("JWT_SECRET", "")
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
     JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "1440"))
 
@@ -25,3 +25,9 @@ class Settings(BaseSettings):
         extra = "allow"
 
 settings = Settings()
+
+if not settings.JWT_SECRET:
+    raise RuntimeError(
+        "JWT_SECRET is not set. Add it to backend/.env (see .env.example) — "
+        "generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
+    )
