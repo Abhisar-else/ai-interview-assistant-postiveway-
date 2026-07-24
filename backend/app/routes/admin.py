@@ -79,3 +79,59 @@ def get_admin_users(
             "joined": u.created_at.strftime("%Y-%m-%d")
         })
     return user_list
+
+@router.get("/interviews")
+def get_admin_interviews(
+    admin: dict = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    sessions = (
+        db.query(InterviewSession)
+        .order_by(InterviewSession.started_at.desc())
+        .all()
+    )
+    results = []
+    for s in sessions:
+        u = db.query(User).filter(User.id == s.user_id).first()
+        r = db.query(InterviewReport).filter(InterviewReport.session_id == s.id).first()
+        results.append({
+            "id": s.id,
+            "user_name": u.name if u else "Candidate",
+            "job_role": s.job_role,
+            "type": s.interview_type,
+            "status": s.status,
+            "score": float(r.overall_score) if r else None,
+            "date": s.started_at.strftime("%Y-%m-%d")
+        })
+    return results
+
+@router.get("/interviews/{session_id}/report")
+def get_admin_interview_report(
+    session_id: int,
+    admin: dict = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    report = db.query(InterviewReport).filter(InterviewReport.session_id == session_id).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+
+    session = db.query(InterviewSession).filter(InterviewSession.id == session_id).first()
+
+    return {
+        "report": {
+            "overall_score": float(report.overall_score),
+            "technical_score": float(report.technical_score),
+            "communication_score": float(report.communication_score),
+            "problem_solving_score": float(report.problem_solving_score),
+            "confidence_score": float(report.confidence_score),
+            "strengths": report.strengths,
+            "improvements": report.improvements,
+            "recommended_topics": report.recommended_topics
+        },
+        "session": {
+            "job_role": session.job_role,
+            "interview_type": session.interview_type,
+            "difficulty": session.difficulty,
+            "transcript": session.transcript
+        }
+    }

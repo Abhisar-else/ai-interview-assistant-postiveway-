@@ -167,6 +167,7 @@ The frontend application will be available at `http://localhost:5173`.
 │   ├── requirements.txt   # Python dependencies
 │   └── .env               # Backend environment variables
 ├── schema.sql             # PostgreSQL Database Schema
+├── PRD.md                # Product Requirements Document
 ├── PROMPTS.md             # LLM Prompt Templates used for the AI logic
 ├── TASKS.md               # Build checklist and project tracking
 └── CLAUDE.md              # Project specifications and architecture

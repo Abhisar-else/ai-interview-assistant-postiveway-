@@ -6,11 +6,40 @@ from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.core.security import get_current_user
 from app.core.config import settings
-from app.models.models import Resume
-from app.schemas.schemas import ResumeOut
-from app.services.resume_parser import parse_resume
+from app.models.models import Resume, User
+from app.schemas.schemas import ResumeOut, UserOut
 
 router = APIRouter(prefix="", tags=["Candidate & Resume"])
+
+@router.get("/profile", response_model=UserOut)
+def get_profile(
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.id == current_user["id"]).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+@router.put("/profile", response_model=UserOut)
+def update_profile(
+    name: str = None,
+    phone: str = None,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    user = db.query(User).filter(User.id == current_user["id"]).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if name:
+        user.name = name
+    if phone:
+        user.phone = phone
+
+    db.commit()
+    db.refresh(user)
+    return user
 
 @router.post("/resume/upload")
 async def upload_resume(
@@ -56,6 +85,7 @@ async def upload_resume(
     }
 
 @router.get("/resume")
+@router.get("/resume/status")
 def get_user_resume(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
