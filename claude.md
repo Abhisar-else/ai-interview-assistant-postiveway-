@@ -210,9 +210,9 @@ Voice interview, coding round, company-specific modes, ATS score, PDF report exp
 ---
 
 ## Deliverables Checklist
-- [ ] Responsive web app (candidate + admin dashboards)
-- [ ] Resume upload module
-- [ ] AI interview chat interface
-- [ ] AI performance report
-- [ ] GitHub repository (clean structure, README)
-- [ ] Project documentation (PRD-style, matching prior project's format)
+- [x] Responsive web app (candidate + admin dashboards)
+- [x] Resume upload module
+- [x] AI interview chat interface
+- [x] AI performance report
+- [x] GitHub repository (clean structure, README)
+- [x] Project documentation (PRD-style, matching prior project's format)
