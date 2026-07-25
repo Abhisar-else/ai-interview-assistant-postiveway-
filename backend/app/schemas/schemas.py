@@ -59,6 +59,8 @@ class SessionOut(BaseModel):
     difficulty: str
     status: str
     transcript: Optional[List[Dict[str, Any]]] = None
+    overall_score: Optional[float] = None
+    ats_score: Optional[float] = None
     started_at: datetime
     completed_at: Optional[datetime] = None
 
@@ -70,6 +72,7 @@ class ReportOut(BaseModel):
     id: int
     session_id: int
     overall_score: float
+    ats_score: float
     technical_score: float
     communication_score: float
     problem_solving_score: float

@@ -87,10 +87,16 @@ export default function ReportPage() {
         </div>
       </Card>
 
-      {/* Four Radial Rings Grid */}
+      {/* Core Measurement Dimensions Grid */}
       <section className={styles.ringsSection}>
         <h3 className={styles.sectionHeading}>Core Measurement Dimensions</h3>
         <div className={styles.ringsGrid}>
+          <Card padding="md">
+            <RadialRing
+              value={Number(report?.ats_score || 0)}
+              label="ATS Resume Match"
+            />
+          </Card>
           <Card padding="md">
             <RadialRing
               value={Number(report?.technical_score || 0)}

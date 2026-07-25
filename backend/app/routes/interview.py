@@ -116,12 +116,17 @@ def complete_interview_session(
     session.status = "completed"
     session.completed_at = datetime.utcnow()
 
+    # Fetch resume summary
+    resume = db.query(Resume).filter(Resume.id == session.resume_id).first() if session.resume_id else None
+    resume_summary = resume.parsed_json if resume else {}
+
     # Generate final AI report
     report_dict = generate_performance_report(
         job_role=session.job_role,
         interview_type=session.interview_type,
         difficulty=session.difficulty,
-        transcript=session.transcript or []
+        transcript=session.transcript or [],
+        resume_summary=resume_summary
     )
 
     # Save to interview_reports table
@@ -130,6 +135,7 @@ def complete_interview_session(
         report = InterviewReport(
             session_id=session.id,
             overall_score=report_dict.get("overall_score", 75),
+            ats_score=report_dict.get("ats_score", 70),
             technical_score=report_dict.get("technical_score", 75),
             communication_score=report_dict.get("communication_score", 75),
             problem_solving_score=report_dict.get("problem_solving_score", 75),
@@ -148,6 +154,7 @@ def complete_interview_session(
         "id": report.id,
         "session_id": report.session_id,
         "overall_score": float(report.overall_score),
+        "ats_score": float(report.ats_score) if report.ats_score else 0,
         "technical_score": float(report.technical_score),
         "communication_score": float(report.communication_score),
         "problem_solving_score": float(report.problem_solving_score),
@@ -167,20 +174,21 @@ def get_interview_history(
         InterviewSession.user_id == current_user["id"]
     ).order_by(InterviewSession.started_at.desc()).all()
     result = []
-for s in sessions:
-    report = db.query(InterviewReport).filter(InterviewReport.session_id == s.id).first()
-    result.append({
-        "id": s.id,
-        "job_role": s.job_role,
-        "interview_type": s.interview_type,
-        "difficulty": s.difficulty,
-        "status": s.status,
-        "transcript": s.transcript,
-        "started_at": s.started_at,
-        "completed_at": s.completed_at,
-        "overall_score": float(report.overall_score) if report else None,
-    })
-return result
+    for s in sessions:
+        report = db.query(InterviewReport).filter(InterviewReport.session_id == s.id).first()
+        result.append({
+            "id": s.id,
+            "job_role": s.job_role,
+            "interview_type": s.interview_type,
+            "difficulty": s.difficulty,
+            "status": s.status,
+            "transcript": s.transcript,
+            "started_at": s.started_at,
+            "completed_at": s.completed_at,
+            "overall_score": float(report.overall_score) if report else None,
+            "ats_score": float(report.ats_score) if report and report.ats_score else None,
+        })
+    return result
 
 @router.get("/{session_id}")
 def get_session_by_id(
@@ -217,6 +225,7 @@ def get_session_report(
         "id": report.id,
         "session_id": report.session_id,
         "overall_score": float(report.overall_score),
+        "ats_score": float(report.ats_score) if report.ats_score else 0,
         "technical_score": float(report.technical_score),
         "communication_score": float(report.communication_score),
         "problem_solving_score": float(report.problem_solving_score),

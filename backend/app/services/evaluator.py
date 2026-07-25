@@ -3,9 +3,10 @@ from typing import List, Dict, Any
 from app.services.llm import call_llm
 
 FINAL_REPORT_PROMPT = """SYSTEM:
-You are evaluating a completed mock interview transcript. Output ONLY valid JSON, no markdown fences:
+You are evaluating a completed mock interview session. Output ONLY valid JSON, no markdown fences:
 {
   "overall_score": 0-100,
+  "ats_score": 0-100,
   "technical_score": 0-100,
   "communication_score": 0-100,
   "problem_solving_score": 0-100,
@@ -14,21 +15,29 @@ You are evaluating a completed mock interview transcript. Output ONLY valid JSON
   "improvements": [string, string, string],
   "recommended_topics": [string, string, string]
 }
-Base scores on substance, correctness, structure of answers, and communication clarity across the full transcript. Be specific and constructive, not generic.
+Base "ats_score" on how well the candidate's resume (skills, projects, experience) matches the requirements of the targeted job role.
+Base other scores on substance, correctness, structure of answers, and communication clarity across the full transcript.
+Be specific and constructive, not generic.
 """
 
 def generate_performance_report(
     job_role: str,
     interview_type: str,
     difficulty: str,
-    transcript: List[Dict[str, Any]]
+    transcript: List[Dict[str, Any]],
+    resume_summary: Dict[str, Any] = None
 ) -> Dict[str, Any]:
     transcript_json = json.dumps(transcript, indent=2)
+    resume_json = json.dumps(resume_summary or {}, indent=2)
 
     user_prompt = f"""Job role: {job_role}
 Interview type: {interview_type}
 Difficulty: {difficulty}
-Full transcript:
+
+Candidate Resume Summary:
+{resume_json}
+
+Full Interview Transcript:
 {transcript_json}"""
 
     llm_output = call_llm(FINAL_REPORT_PROMPT, user_prompt, json_only=True)
@@ -39,6 +48,7 @@ Full transcript:
     except Exception:
         report_data = {
             "overall_score": 75,
+            "ats_score": 70,
             "technical_score": 78,
             "communication_score": 75,
             "problem_solving_score": 74,

@@ -120,6 +120,7 @@ def get_admin_interview_report(
     return {
         "report": {
             "overall_score": float(report.overall_score),
+            "ats_score": float(report.ats_score) if report.ats_score else 0,
             "technical_score": float(report.technical_score),
             "communication_score": float(report.communication_score),
             "problem_solving_score": float(report.problem_solving_score),
