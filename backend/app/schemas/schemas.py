@@ -94,11 +94,13 @@ class ReportOut(BaseModel):
 # --- Categories ---
 class CategoryCreate(BaseModel):
     job_role: str
+    target_company: Optional[str] = None
     interview_type: str
     difficulty: str
 
 class CategoryUpdate(BaseModel):
     job_role: Optional[str] = None
+    target_company: Optional[str] = None
     interview_type: Optional[str] = None
     difficulty: Optional[str] = None
     active: Optional[bool] = None
@@ -106,6 +108,7 @@ class CategoryUpdate(BaseModel):
 class CategoryOut(BaseModel):
     id: int
     job_role: str
+    target_company: Optional[str] = None
     interview_type: str
     difficulty: str
     active: bool

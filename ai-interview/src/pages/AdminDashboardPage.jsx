@@ -32,6 +32,7 @@ export default function AdminDashboardPage() {
   // New Category Modal state
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newRole, setNewRole] = useState('');
+  const [newTargetCompany, setNewTargetCompany] = useState('');
   const [newType, setNewType] = useState('Technical');
   const [newDifficulty, setNewDifficulty] = useState('Medium');
 
@@ -63,12 +64,14 @@ export default function AdminDashboardPage() {
   try {
     const created = await api.createCategory({
       job_role: newRole,
+      target_company: newTargetCompany.trim() || null,
       interview_type: newType,
       difficulty: newDifficulty,
     });
     setCategories([...categories, created]);
     setShowCategoryModal(false);
     setNewRole('');
+    setNewTargetCompany('');
     setCatActionError('');
   } catch (err) {
     setCatActionError('Failed to create category. Please try again.');
@@ -272,6 +275,7 @@ const handleViewReport = async (sessionId) => {
                 <thead>
                   <tr>
                     <th>Job Role</th>
+                    <th>Target Company</th>
                     <th>Type</th>
                     <th>Difficulty</th>
                     <th>Status</th>
@@ -282,6 +286,7 @@ const handleViewReport = async (sessionId) => {
                   {categories.map((cat) => (
                     <tr key={cat.id}>
                       <td className={styles.userCell}>{cat.job_role}</td>
+                      <td>{cat.target_company || <span className="data-text">Generic</span>}</td>
                       <td>{cat.interview_type}</td>
                       <td>
                         <Badge variant="navy" mono>{cat.difficulty}</Badge>
@@ -431,6 +436,13 @@ const handleViewReport = async (sessionId) => {
             value={newRole}
             onChange={(e) => setNewRole(e.target.value)}
             required
+          />
+
+          <Input
+            label="Target Company (Optional)"
+            placeholder="e.g. Google"
+            value={newTargetCompany}
+            onChange={(e) => setNewTargetCompany(e.target.value)}
           />
 
           <div className={styles.modalGroup}>

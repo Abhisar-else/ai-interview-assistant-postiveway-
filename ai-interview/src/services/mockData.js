@@ -266,20 +266,21 @@ export async function getSession(id) {
   return MOCK_SESSIONS.find(s => s.id === Number(id)) || MOCK_SESSIONS[0];
 }
 
-export async function startInterview({ job_role, interview_type, difficulty }) {
+export async function startInterview({ job_role, target_company, interview_type, difficulty }) {
   await delay(1200);
   const newSession = {
     id: Date.now(),
     user_id: 1,
     resume_id: 1,
     job_role,
+    target_company,
     interview_type,
     difficulty,
     status: 'in_progress',
     started_at: new Date().toISOString(),
     completed_at: null,
     transcript: [
-      { role: 'ai', content: getOpeningQuestion(job_role, interview_type) },
+      { role: 'ai', content: getOpeningQuestion(job_role, interview_type, target_company) },
     ],
   };
   return newSession;
@@ -383,7 +384,8 @@ export async function getAdminInterviewReport(sessionId) {
 
 // --- Helper functions ---
 
-function getOpeningQuestion(role, type) {
+function getOpeningQuestion(role, type, company) {
+  const companyPrefix = company ? `Welcome to your interview for ${company}. ` : '';
   const questions = {
     'Software Engineer_Technical': 'Tell me about a complex technical challenge you faced in one of your projects. Walk me through your approach to solving it.',
     'Frontend Developer_Technical': 'Can you explain how React\'s reconciliation algorithm works and why it matters for application performance?',
@@ -392,7 +394,7 @@ function getOpeningQuestion(role, type) {
     'AI/ML Engineer_Technical': 'What are the key differences between batch and online learning, and when would you use each approach?',
     'Full Stack Developer_Mixed': 'Describe a project where you owned both the frontend and backend. What were the biggest coordination challenges?',
   };
-  return questions[`${role}_${type}`] || 'Tell me about yourself and what draws you to this role.';
+  return companyPrefix + (questions[`${role}_${type}`] || 'Tell me about yourself and what draws you to this role.');
 }
 
 const followUpQuestions = [
@@ -416,6 +418,7 @@ export async function createCategory(category) {
   const newCat = {
     id: Math.max(0, ...MOCK_CATEGORIES.map((c) => c.id)) + 1,
     job_role: category.job_role,
+    target_company: category.target_company,
     interview_type: category.interview_type,
     difficulty: category.difficulty,
     active: true,

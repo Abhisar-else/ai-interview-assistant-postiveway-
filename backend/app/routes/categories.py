@@ -24,7 +24,7 @@ def get_public_categories(db: Session = Depends(get_db)):
             ("Full Stack Developer", "Mixed", "Medium"),
         ]
         for role, itype, diff in defaults:
-            c = InterviewCategory(job_role=role, interview_type=itype, difficulty=diff, active=True)
+            c = InterviewCategory(job_role=role, target_company=None, interview_type=itype, difficulty=diff, active=True)
             db.add(c)
         db.commit()
         categories = db.query(InterviewCategory).all()
@@ -45,6 +45,7 @@ def create_category(
 ):
     cat = InterviewCategory(
         job_role=data.job_role,
+        target_company=data.target_company,
         interview_type=data.interview_type,
         difficulty=data.difficulty,
         active=True
@@ -67,6 +68,8 @@ def update_category(
 
     if data.job_role is not None:
         cat.job_role = data.job_role
+    if data.target_company is not None:
+        cat.target_company = data.target_company
     if data.interview_type is not None:
         cat.interview_type = data.interview_type
     if data.difficulty is not None:

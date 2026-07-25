@@ -8,6 +8,7 @@ from app.core.security import get_current_user
 from app.core.config import settings
 from app.models.models import Resume, User
 from app.schemas.schemas import ResumeOut, UserOut, ProfileUpdate
+from app.services.resume_parser import parse_resume
 
 router = APIRouter(prefix="", tags=["Candidate & Resume"])
 
@@ -31,9 +32,9 @@ def update_profile(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if data.name:
+    if data.name is not None:
         user.name = data.name
-    if data.phone:
+    if data.phone is not None:
         user.phone = data.phone
 
     db.commit()
