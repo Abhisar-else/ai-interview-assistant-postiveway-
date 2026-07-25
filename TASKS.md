@@ -46,9 +46,10 @@ Work top to bottom. Each block is roughly one focused session. Check items off a
 ## 8. Polish & Ship
 - [x] Responsive check (mobile breakpoints on chat + dashboards)
 - [x] Error states (upload failure, LLM timeout, empty history)
+- [x] Score Trend Visualization on Dashboard
 - [x] README with setup/run instructions
-- [x] Push to GitHub, verify no secrets committed (`git diff --cached` before every commit)
-- [x] Final PRD-format documentation (matching prior internship project's format)
+- [x] Push to GitHub, verify no secrets committed
+- [x] Final PRD-format documentation
 
 ## Explicitly deferred (do not build unless all above is done early)
 Voice interview, coding round, company-specific modes, ATS score, PDF export, multi-language.

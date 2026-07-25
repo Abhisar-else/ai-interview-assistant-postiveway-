@@ -7,6 +7,7 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import ConfidenceNeedle from '../components/needle/ConfidenceNeedle';
 import ResumeUpload from '../components/resume/ResumeUpload';
+import ScoreTrend from '../components/dashboard/ScoreTrend';
 import styles from './DashboardPage.module.css';
 
 export default function DashboardPage() {
@@ -110,6 +111,7 @@ export default function DashboardPage() {
               </span>
             </div>
           </div>
+          <ScoreTrend sessions={sessions} />
         </Card>
 
         {/* Start Interview CTA */}
