@@ -40,6 +40,7 @@ CREATE TABLE interview_sessions (
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     resume_id INTEGER REFERENCES resumes(id),
     job_role VARCHAR(50) NOT NULL,
+    target_company VARCHAR(100),
     interview_type VARCHAR(20) NOT NULL,
     difficulty VARCHAR(20) NOT NULL,
     status VARCHAR(20) DEFAULT 'in_progress',

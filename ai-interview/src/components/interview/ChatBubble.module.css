@@ -45,3 +45,11 @@
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+.mono {
+  font-family: var(--font-mono, monospace);
+  font-size: var(--text-sm);
+  background: rgba(255, 255, 255, 0.05);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+}

@@ -26,7 +26,8 @@ def start_interview_session(
         difficulty=data.difficulty,
         resume_summary=resume_summary,
         transcript=[],
-        is_first_turn=True
+        is_first_turn=True,
+        target_company=data.target_company
     )
 
     initial_transcript = [{"role": "ai", "content": opening_q}]
@@ -35,6 +36,7 @@ def start_interview_session(
         user_id=current_user["id"],
         resume_id=resume.id if resume else None,
         job_role=data.job_role,
+        target_company=data.target_company,
         interview_type=data.interview_type,
         difficulty=data.difficulty,
         status="in_progress",
@@ -48,6 +50,7 @@ def start_interview_session(
     return {
         "id": session.id,
         "job_role": session.job_role,
+        "target_company": session.target_company,
         "interview_type": session.interview_type,
         "difficulty": session.difficulty,
         "status": session.status,
@@ -88,7 +91,8 @@ def submit_answer(
         difficulty=session.difficulty,
         resume_summary=resume_summary,
         transcript=transcript,
-        is_first_turn=False
+        is_first_turn=False,
+        target_company=session.target_company
     )
 
     transcript.append({"role": "ai", "content": next_q})
@@ -126,7 +130,8 @@ def complete_interview_session(
         interview_type=session.interview_type,
         difficulty=session.difficulty,
         transcript=session.transcript or [],
-        resume_summary=resume_summary
+        resume_summary=resume_summary,
+        target_company=session.target_company
     )
 
     # Save to interview_reports table

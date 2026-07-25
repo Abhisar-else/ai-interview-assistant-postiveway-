@@ -43,6 +43,7 @@ class InterviewCategory(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     job_role = Column(String(50), nullable=False)
+    target_company = Column(String(100), nullable=True)
     interview_type = Column(String(20), nullable=False)
     difficulty = Column(String(20), nullable=False)
     active = Column(Boolean, default=True)
@@ -54,6 +55,7 @@ class InterviewSession(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     resume_id = Column(Integer, ForeignKey("resumes.id"), nullable=True)
     job_role = Column(String(50), nullable=False)
+    target_company = Column(String(100), nullable=True)
     interview_type = Column(String(20), nullable=False)
     difficulty = Column(String(20), nullable=False)
     status = Column(String(20), default="in_progress", index=True)

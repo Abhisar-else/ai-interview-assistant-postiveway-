@@ -52,4 +52,11 @@ Work top to bottom. Each block is roughly one focused session. Check items off a
 - [x] Final PRD-format documentation
 
 ## Explicitly deferred (do not build unless all above is done early)
-Voice interview, coding round, company-specific modes, ATS score, PDF export, multi-language.
+Voice interview, ATS score, PDF export, multi-language.
+
+## Completed Extra Features
+- [x] ATS Resume Match Score integration across full stack
+- [x] Adaptive follow-up probing logic in AI Interviewer
+- [x] Composite performance gauges on Candidate Dashboard
+- [x] Coding Round (logic + UI rendering)
+- [x] Company-Specific Modes (context-aware interviewing)

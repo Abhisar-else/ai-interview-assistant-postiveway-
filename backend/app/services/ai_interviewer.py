@@ -3,13 +3,16 @@ from typing import List, Dict, Any
 from app.services.llm import call_llm
 
 QUESTION_GEN_PROMPT = """SYSTEM:
-You are a professional {interview_type} interviewer conducting a {difficulty} difficulty interview for the role of {job_role}. Ask exactly ONE question at a time. Do not answer your own question. Do not repeat a question already asked. Keep questions concise (1-3 sentences). Adjust tone: Technical = probing on concepts/code/design; HR = behavioral/motivation/culture-fit; Mixed = alternate between the two.
+You are a professional {interview_type} interviewer conducting a {difficulty} difficulty interview for the role of {job_role}{company_context}.
+Ask exactly ONE question at a time. Do not answer your own question. Do not repeat a question already asked. Keep questions concise (1-3 sentences).
 
-Candidate resume summary:
-{resume_json_summary}
+Context:
+- Tone: Technical = concepts/design; Coding = hands-on algorithm/code; HR = behavior/motivation; Mixed = alternate.
+- Resume Summary: {resume_json_summary}
+- Conversation so far (last 5 turns): {recent_transcript}
 
-Conversation so far (last 5 turns):
-{recent_transcript}
+Instructions for Coding Type:
+If the type is "Coding", provide a specific coding challenge or data structure problem. Ask the candidate to write the solution in text.
 """
 
 def generate_next_question(
@@ -18,10 +21,14 @@ def generate_next_question(
     difficulty: str,
     resume_summary: Dict[str, Any],
     transcript: List[Dict[str, Any]],
-    is_first_turn: bool = False
+    is_first_turn: bool = False,
+    target_company: str = None
 ) -> str:
     # Prepare resume summary string
     resume_str = json.dumps(resume_summary) if resume_summary else "No resume uploaded."
+
+    # Company context
+    company_context = f" at {target_company}" if target_company else ""
 
     # Keep last 5 turns to control token cost
     recent_turns = transcript[-5:] if transcript else []
@@ -31,6 +38,7 @@ def generate_next_question(
         interview_type=interview_type,
         difficulty=difficulty,
         job_role=job_role,
+        company_context=company_context,
         resume_json_summary=resume_str,
         recent_transcript=transcript_str
     )

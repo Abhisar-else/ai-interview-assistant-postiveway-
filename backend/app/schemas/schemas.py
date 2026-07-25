@@ -42,6 +42,7 @@ class ResumeOut(BaseModel):
 # --- Interview ---
 class InterviewStart(BaseModel):
     job_role: str
+    target_company: Optional[str] = None
     interview_type: str
     difficulty: str
 
@@ -55,6 +56,7 @@ class SessionOut(BaseModel):
     id: int
     user_id: int
     job_role: str
+    target_company: Optional[str] = None
     interview_type: str
     difficulty: str
     status: str

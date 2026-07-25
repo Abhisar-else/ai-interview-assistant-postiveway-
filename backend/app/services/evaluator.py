@@ -25,12 +25,14 @@ def generate_performance_report(
     interview_type: str,
     difficulty: str,
     transcript: List[Dict[str, Any]],
-    resume_summary: Dict[str, Any] = None
+    resume_summary: Dict[str, Any] = None,
+    target_company: str = None
 ) -> Dict[str, Any]:
     transcript_json = json.dumps(transcript, indent=2)
     resume_json = json.dumps(resume_summary or {}, indent=2)
+    company_context = f" for {target_company}" if target_company else ""
 
-    user_prompt = f"""Job role: {job_role}
+    user_prompt = f"""Job role: {job_role}{company_context}
 Interview type: {interview_type}
 Difficulty: {difficulty}
 

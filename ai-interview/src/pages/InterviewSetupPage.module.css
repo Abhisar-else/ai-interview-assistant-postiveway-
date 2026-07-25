@@ -78,6 +78,28 @@
   letter-spacing: 0.05em;
 }
 
+.companyRow {
+  margin-bottom: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.companyInput {
+  background: var(--color-white);
+  border: 1.5px solid var(--color-fog-darker);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-ink-navy);
+  outline: none;
+  transition: border-color var(--duration-fast);
+}
+
+.companyInput:focus {
+  border-color: var(--color-ember-amber);
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

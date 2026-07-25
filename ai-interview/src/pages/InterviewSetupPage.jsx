@@ -18,6 +18,7 @@ const ROLES = [
 
 const TYPES = [
   { id: 'Technical', label: 'Technical Round', desc: 'Deep dive into coding concepts, algorithms & architecture' },
+  { id: 'Coding', label: 'Coding Round', desc: 'Hands-on problem solving, data structures & algorithm implementation' },
   { id: 'HR', label: 'HR / Behavioral', desc: 'Culture fit, motivation, conflict resolution & teamwork' },
   { id: 'Mixed', label: 'Mixed Round', desc: 'Balanced assessment of both technical competence and soft skills' },
 ];
@@ -32,6 +33,7 @@ export default function InterviewSetupPage() {
   const navigate = useNavigate();
 
   const [selectedRole, setSelectedRole] = useState('Software Engineer');
+  const [targetCompany, setTargetCompany] = useState('');
   const [selectedType, setSelectedType] = useState('Technical');
   const [selectedDifficulty, setSelectedDifficulty] = useState('Medium');
   const [resume, setResume] = useState(null);
@@ -57,6 +59,7 @@ export default function InterviewSetupPage() {
     try {
       const session = await api.startInterview({
         job_role: selectedRole,
+        target_company: targetCompany.trim() || null,
         interview_type: selectedType,
         difficulty: selectedDifficulty,
       });
@@ -97,7 +100,19 @@ export default function InterviewSetupPage() {
 
       {/* 1. Job Role Selection */}
       <section className={styles.section}>
-        <h3 className={styles.sectionTitle}>1. Select Target Job Role</h3>
+        <h3 className={styles.sectionTitle}>1. Target Role & Company</h3>
+
+        <div className={styles.companyRow}>
+          <label className="data-text">TARGET COMPANY (OPTIONAL):</label>
+          <input
+            type="text"
+            className={styles.companyInput}
+            placeholder="e.g. Google, Amazon, OpenAI..."
+            value={targetCompany}
+            onChange={(e) => setTargetCompany(e.target.value)}
+          />
+        </div>
+
         <div className={styles.grid}>
           {ROLES.map((role) => (
             <div
