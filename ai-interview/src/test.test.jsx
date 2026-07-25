@@ -2,9 +2,9 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 
 describe('Basic Application Sanity Check', () => {
-  it('should fail to find the welcome message (RED)', () => {
-    render(<div>Wrong Welcome Message</div>);
-    // This will fail because the rendered text doesn't match the regex
+  it('should find the welcome message (GREEN)', () => {
+    render(<div>Welcome back, Candidate!</div>);
+    // This will pass now
     expect(screen.getByText(/Welcome back/i)).toBeInTheDocument();
   });
 });

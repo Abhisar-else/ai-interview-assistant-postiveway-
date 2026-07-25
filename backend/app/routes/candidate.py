@@ -7,7 +7,7 @@ from app.core.db import get_db
 from app.core.security import get_current_user
 from app.core.config import settings
 from app.models.models import Resume, User
-from app.schemas.schemas import ResumeOut, UserOut
+from app.schemas.schemas import ResumeOut, UserOut, ProfileUpdate
 
 router = APIRouter(prefix="", tags=["Candidate & Resume"])
 
@@ -23,8 +23,7 @@ def get_profile(
 
 @router.put("/profile", response_model=UserOut)
 def update_profile(
-    name: str = None,
-    phone: str = None,
+    data: ProfileUpdate,
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -32,10 +31,10 @@ def update_profile(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if name:
-        user.name = name
-    if phone:
-        user.phone = phone
+    if data.name:
+        user.name = data.name
+    if data.phone:
+        user.phone = data.phone
 
     db.commit()
     db.refresh(user)

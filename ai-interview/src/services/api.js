@@ -46,6 +46,18 @@ export async function getUser() {
   return data;
 }
 
+export async function getProfile() {
+  if (USE_MOCK) return mock.getProfile();
+  const { data } = await api.get('/profile');
+  return data;
+}
+
+export async function updateProfile(updates) {
+  if (USE_MOCK) return mock.updateProfile(updates);
+  const { data } = await api.put('/profile', updates);
+  return data;
+}
+
 // --- Resume ---
 export async function getResume() {
   if (USE_MOCK) return mock.getResume();
@@ -136,6 +148,18 @@ export async function getAdminDashboard() {
 export async function getAdminUsers() {
   if (USE_MOCK) return mock.getAdminUsers();
   const { data } = await api.get('/admin/users');
+  return data;
+}
+
+export async function getAdminInterviews() {
+  if (USE_MOCK) return mock.getAdminInterviews();
+  const { data } = await api.get('/admin/interviews');
+  return data;
+}
+
+export async function getAdminInterviewReport(sessionId) {
+  if (USE_MOCK) return mock.getAdminInterviewReport(sessionId);
+  const { data } = await api.get(`/admin/interviews/${sessionId}/report`);
   return data;
 }
 

@@ -64,6 +64,10 @@ export function AuthProvider({ children }) {
     setIsAdmin(false);
   }, []);
 
+  const updateUser = useCallback((updates) => {
+    setUser((prev) => (prev ? { ...prev, ...updates } : prev));
+  }, []);
+
   const value = {
     user,
     token,
@@ -74,6 +78,7 @@ export function AuthProvider({ children }) {
     adminLogin,
     register,
     logout,
+    updateUser,
   };
 
   return (

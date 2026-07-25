@@ -5,28 +5,39 @@ import * as api from '../services/api';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
+import Modal from '../components/ui/Modal';
+import Input from '../components/ui/Input';
 import ConfidenceNeedle from '../components/needle/ConfidenceNeedle';
 import ResumeUpload from '../components/resume/ResumeUpload';
 import ScoreTrend from '../components/dashboard/ScoreTrend';
 import styles from './DashboardPage.module.css';
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const navigate = useNavigate();
 
   const [resume, setResume] = useState(null);
   const [sessions, setSessions] = useState([]);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileName, setProfileName] = useState('');
+  const [profilePhone, setProfilePhone] = useState('');
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileError, setProfileError] = useState('');
 
   useEffect(() => {
     async function loadDashboardData() {
       try {
-        const [resumeData, sessionsData] = await Promise.all([
+        const [resumeData, sessionsData, profileData] = await Promise.all([
           api.getResume().catch(() => null),
           api.getSessions().catch(() => []),
+          api.getProfile().catch(() => null),
         ]);
         setResume(resumeData);
         setSessions(sessionsData);
+        setProfile(profileData);
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
       } finally {
@@ -35,6 +46,29 @@ export default function DashboardPage() {
     }
     loadDashboardData();
   }, []);
+
+  const openProfileModal = () => {
+    setProfileName(profile?.name || user?.name || '');
+    setProfilePhone(profile?.phone || '');
+    setProfileError('');
+    setShowProfileModal(true);
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    setProfileSaving(true);
+    setProfileError('');
+    try {
+      const updated = await api.updateProfile({ name: profileName, phone: profilePhone });
+      setProfile(updated);
+      updateUser({ name: updated.name });
+      setShowProfileModal(false);
+    } catch (err) {
+      setProfileError('Failed to update profile. Please try again.');
+    } finally {
+      setProfileSaving(false);
+    }
+  };
 
   const handleResumeUpload = async (file) => {
     const updated = await api.uploadResume(file);
@@ -72,6 +106,13 @@ export default function DashboardPage() {
             <p className={styles.welcomeSub}>
               Your performance metrics are active. Rehearse technical & behavioral questions in a high-gravity environment.
             </p>
+            <div className={styles.profileRow}>
+              <span className={styles.profileDetail}>{profile?.email || user?.email}</span>
+              {profile?.phone && <span className={styles.profileDetail}>{profile.phone}</span>}
+              <button type="button" className={styles.profileEditLink} onClick={openProfileModal}>
+                Edit Profile
+              </button>
+            </div>
           </div>
         </Card>
 
@@ -187,6 +228,32 @@ export default function DashboardPage() {
           )}
         </Card>
       </div>
+
+      <Modal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} title="Edit Profile">
+        <form onSubmit={handleSaveProfile} className={styles.modalForm}>
+          <Input
+            label="Full Name"
+            value={profileName}
+            onChange={(e) => setProfileName(e.target.value)}
+            required
+          />
+          <Input
+            label="Phone Number"
+            placeholder="e.g. +91 98765 43210"
+            value={profilePhone}
+            onChange={(e) => setProfilePhone(e.target.value)}
+          />
+          {profileError && <p className={styles.profileError}>{profileError}</p>}
+          <div className={styles.modalActions}>
+            <Button type="button" variant="ghost" onClick={() => setShowProfileModal(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="accent" disabled={profileSaving}>
+              {profileSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -28,6 +28,10 @@ class UserOut(BaseModel):
     class Config:
         from_attributes = True
 
+class ProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+
 # --- Resume ---
 class ResumeOut(BaseModel):
     id: int

@@ -3,8 +3,7 @@ from app.main import app
 
 client = TestClient(app)
 
-def test_health_check_red():
+def test_health_check_green():
     response = client.get("/api/health")
     assert response.status_code == 200
-    # This will fail: status is 'healthy' in reality
-    assert response.json()["status"] == "incorrect_status"
+    assert response.json()["status"] == "healthy"

@@ -234,6 +234,18 @@ export async function getUser() {
   return MOCK_USER;
 }
 
+export async function getProfile() {
+  await delay(300);
+  return MOCK_USER;
+}
+
+export async function updateProfile(updates) {
+  await delay(400);
+  if (updates.name) MOCK_USER.name = updates.name;
+  if (updates.phone) MOCK_USER.phone = updates.phone;
+  return MOCK_USER;
+}
+
 export async function getResume() {
   await delay(400);
   return MOCK_RESUME;
@@ -330,6 +342,43 @@ export async function getAdminUsers() {
     { id: 4, name: 'Ananya Singh', email: 'ananya@example.com', interviews: 4, avg_score: 71, joined: '2026-07-08' },
     { id: 5, name: 'Arjun Patel', email: 'arjun@example.com', interviews: 7, avg_score: 86, joined: '2026-07-05' },
   ];
+}
+
+export async function getAdminInterviews() {
+  await delay(500);
+  return MOCK_REPORTS.map((r, i) => ({
+    id: r.session_id,
+    user_name: ['Candidate One', 'Priya Mehta', 'Rahul Gupta'][i % 3],
+    job_role: ['Software Engineer', 'Frontend Developer', 'Data Scientist'][i % 3],
+    type: 'Technical',
+    status: 'completed',
+    score: r.overall_score,
+    date: r.generated_at.slice(0, 10),
+  }));
+}
+
+export async function getAdminInterviewReport(sessionId) {
+  await delay(400);
+  const report = MOCK_REPORTS.find(r => r.session_id === Number(sessionId)) || MOCK_REPORTS[0];
+  return {
+    report: {
+      overall_score: report.overall_score,
+      ats_score: report.ats_score || 0,
+      technical_score: report.technical_score,
+      communication_score: report.communication_score,
+      problem_solving_score: report.problem_solving_score,
+      confidence_score: report.confidence_score,
+      strengths: report.strengths,
+      improvements: report.improvements,
+      recommended_topics: report.recommended_topics,
+    },
+    session: {
+      job_role: 'Software Engineer',
+      interview_type: 'Technical',
+      difficulty: 'Medium',
+      transcript: [],
+    },
+  };
 }
 
 // --- Helper functions ---

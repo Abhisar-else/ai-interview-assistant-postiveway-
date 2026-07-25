@@ -7,6 +7,10 @@ import Badge from '../components/ui/Badge';
 import Input from '../components/ui/Input';
 import Modal from '../components/ui/Modal';
 import ConfidenceNeedle from '../components/needle/ConfidenceNeedle';
+import RadialRing from '../components/report/RadialRing';
+import StrengthsList from '../components/report/StrengthsList';
+import ImprovementsList from '../components/report/ImprovementsList';
+import TopicBadges from '../components/report/TopicBadges';
 import styles from './AdminDashboardPage.module.css';
 
 export default function AdminDashboardPage() {
@@ -14,10 +18,16 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [interviews, setInterviews] = useState([]);
   const [catActionError, setCatActionError] = useState('');
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('overview'); // overview | categories | users
+  const [activeTab, setActiveTab] = useState('overview'); // overview | categories | users | interviews
+
+  // Report viewer modal state
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState('');
 
   // New Category Modal state
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -28,14 +38,16 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     async function loadAdminData() {
       try {
-        const [dashStats, userList, catList] = await Promise.all([
+        const [dashStats, userList, catList, interviewList] = await Promise.all([
           api.getAdminDashboard(),
           api.getAdminUsers(),
           api.getCategories(),
+          api.getAdminInterviews(),
         ]);
         setStats(dashStats);
         setUsers(userList);
         setCategories(catList);
+        setInterviews(interviewList);
       } catch (err) {
         console.error('Failed to load admin data:', err);
       } finally {
@@ -85,6 +97,20 @@ export default function AdminDashboardPage() {
   }
 };
 
+const handleViewReport = async (sessionId) => {
+  setReportLoading(true);
+  setReportError('');
+  setSelectedReport({ sessionId }); // opens modal immediately with a loading state
+  try {
+    const data = await api.getAdminInterviewReport(sessionId);
+    setSelectedReport({ sessionId, ...data });
+  } catch (err) {
+    setReportError('Failed to load this report. It may not be generated yet.');
+  } finally {
+    setReportLoading(false);
+  }
+};
+
   const filteredUsers = users.filter(
     (u) =>
       u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -131,6 +157,12 @@ export default function AdminDashboardPage() {
             onClick={() => setActiveTab('users')}
           >
             Candidates ({users.length})
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === 'interviews' ? styles.activeTab : ''}`}
+            onClick={() => setActiveTab('interviews')}
+          >
+            Interviews ({interviews.length})
           </button>
         </div>
       </div>
@@ -327,6 +359,65 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
+      {/* TAB 4: ALL INTERVIEWS */}
+      {activeTab === 'interviews' && (
+        <div className={styles.tabContent}>
+          <Card title="All Interview Sessions" subtitle="Every session across every candidate" padding="lg">
+            {interviews.length === 0 ? (
+              <p className={styles.emptyText}>No interview sessions yet.</p>
+            ) : (
+              <div className={styles.tableWrapper}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Candidate</th>
+                      <th>Role</th>
+                      <th>Type</th>
+                      <th>Status</th>
+                      <th>Score</th>
+                      <th>Date</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {interviews.map((iv) => (
+                      <tr key={iv.id}>
+                        <td className={styles.userCell}>{iv.user_name}</td>
+                        <td>{iv.job_role}</td>
+                        <td>{iv.type}</td>
+                        <td>
+                          <Badge variant={iv.status === 'completed' ? 'completed' : 'in_progress'}>
+                            {iv.status === 'completed' ? 'Completed' : 'In Progress'}
+                          </Badge>
+                        </td>
+                        <td>
+                          {iv.score != null ? (
+                            <Badge variant="green" mono>{Math.round(iv.score)}/100</Badge>
+                          ) : (
+                            <span className="data-text">—</span>
+                          )}
+                        </td>
+                        <td className="data-text">{iv.date}</td>
+                        <td>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={iv.status !== 'completed'}
+                            onClick={() => handleViewReport(iv.id)}
+                          >
+                            View Report
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Card>
+        </div>
+      )}
+
       {/* Add Category Modal */}
       <Modal
         isOpen={showCategoryModal}
@@ -377,6 +468,47 @@ export default function AdminDashboardPage() {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Report Viewer Modal */}
+      <Modal
+        isOpen={!!selectedReport}
+        onClose={() => setSelectedReport(null)}
+        title="Interview Performance Report"
+      >
+        {reportLoading ? (
+          <div className={styles.reportLoading}>
+            <ConfidenceNeedle thinking={true} size="sm" />
+            <p className="data-text">Loading report...</p>
+          </div>
+        ) : reportError ? (
+          <p className={styles.emptyText}>{reportError}</p>
+        ) : selectedReport?.report ? (
+          <div className={styles.reportModalBody}>
+            <p className={styles.metaText}>
+              {selectedReport.session?.job_role} • {selectedReport.session?.interview_type} • {selectedReport.session?.difficulty}
+            </p>
+
+            <div className={styles.reportNeedleRow}>
+              <ConfidenceNeedle
+                value={Number(selectedReport.report.overall_score || 0)}
+                size="md"
+                label="Overall Score"
+              />
+            </div>
+
+            <div className={styles.reportRingsGrid}>
+              <RadialRing value={Number(selectedReport.report.technical_score || 0)} label="Technical" />
+              <RadialRing value={Number(selectedReport.report.communication_score || 0)} label="Communication" />
+              <RadialRing value={Number(selectedReport.report.problem_solving_score || 0)} label="Problem Solving" />
+              <RadialRing value={Number(selectedReport.report.confidence_score || 0)} label="Confidence" />
+            </div>
+
+            <StrengthsList items={selectedReport.report.strengths || []} />
+            <ImprovementsList items={selectedReport.report.improvements || []} />
+            <TopicBadges topics={selectedReport.report.recommended_topics || []} />
+          </div>
+        ) : null}
       </Modal>
     </div>
   );
