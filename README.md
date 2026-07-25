@@ -1,179 +1,146 @@
-# AI Interview Simulator
+# AI Interview Simulator 🚀
 
-AI Interview Simulator is a full-stack web application designed to simulate real technical and HR interviews. It analyzes uploaded resumes, conducts multi-turn AI chat interviews tailored to the candidate's role and difficulty level, evaluates responses, and produces a structured performance report.
+An intelligent, full-stack platform designed to help candidates conquer job interviews through high-gravity AI simulations. It parses resumes, conducts adaptive multi-turn interviews tailored to specific companies and roles, and provides deep performance analytics.
 
-This project was built as an independent internship deliverable for PositiveWay Solutions Pvt. Ltd.
+---
 
-## 🚀 Features
+## ✨ Key Features
 
-### For Candidates
-* **Resume Parsing:** Upload your PDF resume, and the AI will extract your skills, projects, experience, and education.
-* **Customizable Interviews:** Choose your Job Role (Software Engineer, Data Scientist, etc.), Interview Type (Technical, HR, Mixed), and Difficulty (Easy, Medium, Hard).
-* **Context-Aware AI Chat:** The AI generates questions dynamically based on your resume, selected role, difficulty, and your previous answers. It can ask follow-up questions to probe deeper into your responses.
-* **Performance Reports:** Receive a detailed evaluation after completing the interview, including scores (overall, technical, communication, problem-solving, confidence), identified strengths, areas for improvement, and recommended topics to study.
-* **Dashboard:** Track your profile info, resume status, completed interviews, and past reports.
+### 👤 For Candidates
+*   **Resume Grounding:** Upload a PDF resume; AI extracts skills, projects, and experience to personalize every question.
+*   **Adaptive Chat Interface:** A realistic, turn-based interview experience where the AI probes deeper based on your previous answers.
+*   **Multi-Mode Preparation:**
+    *   **Technical Round:** Concepts, system design, and architecture.
+    *   **Coding Round:** Hands-on algorithm and data structure challenges with monospace code rendering.
+    *   **HR / Behavioral:** Culture-fit, motivation, and situational questions.
+    *   **Mixed:** A balanced blend of all the above.
+*   **Company-Specific Training:** Configure simulations for specific targets like Google, Amazon, or local startups.
+*   **Performance Analytics:** Detailed reports including:
+    *   **ATS Resume Match:** Real-time feedback on how your resume aligns with the target role.
+    *   **Core Metrics:** Technical Accuracy, Communication Clarity, Problem Solving Depth, and Confidence.
+    *   **Qualitative Feedback:** Specific strengths, areas for improvement, and recommended study topics.
+*   **Score Trends:** Track your progress over time with visual performance charts on your dashboard.
+*   **Profile Management:** Manage your contact details and identity securely.
 
-### For Admins
-* **Secure Dashboard:** View total users, total interviews conducted, average interview scores, most-selected job roles, and recent interview activity.
-* **Category Management:** Manage interview categories (Job Roles, Interview Types, Difficulty levels).
-* **Candidate Oversight:** View the performance reports of any candidate.
+### 🛡️ For Admins
+*   **Management Dashboard:** High-level metrics on system usage, average performance, and popular roles.
+*   **Global History:** View and audit every interview session conducted on the platform.
+*   **Detailed Report Viewer:** Access the full AI-generated performance report for any candidate session.
+*   **Category CRUD:** Manage the available job roles, difficulty levels, and interview types available to candidates.
+
+---
 
 ## 🛠️ Tech Stack
 
-* **Frontend:** React.js + Vite + Tailwind CSS
-* **Backend:** FastAPI (Python)
-* **Database:** PostgreSQL
-* **AI Integration:** OpenAI API (or Google Gemini API)
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend** | React.js (Vite), Tailwind CSS, Headless UI |
+| **Backend** | FastAPI (Python 3.10+), SQLAlchemy (ORM) |
+| **Database** | PostgreSQL |
+| **AI** | Google Gemini API (or OpenAI GPT-4o) |
+| **Testing** | Vitest (Frontend), Pytest (Backend) |
 
-## 📋 Prerequisites
+---
 
-Before you begin, ensure you have the following installed on your local machine:
+## 🚀 Local Installation & Setup
 
-* **Node.js** (v18+ recommended) and `npm`
-* **Python** (v3.10+ recommended)
-* **PostgreSQL**
+### 1. Prerequisites
+*   Node.js (v18+)
+*   Python (v3.10+)
+*   PostgreSQL 14+
 
-## 💻 Local Installation & Setup
-
-Follow these steps to run the application on your localhost.
-
-### 1. Clone the repository
-
+### 2. Database Initialization
 ```bash
-git clone <your-repo-url>
-cd ai-interview-simulator
-```
+# Create the database
+psql -U postgres -c "CREATE DATABASE interview_simulator;"
 
-### 2. Database Setup
-
-Ensure your PostgreSQL server is running. Create a new database named `interview_simulator` and run the provided SQL schema to create the necessary tables.
-
-```bash
-# Log into your PostgreSQL instance
-psql -U your_postgres_user
-
-# Inside psql shell
-CREATE DATABASE interview_simulator;
-\q
-
-# Run the schema script
-psql -U your_postgres_user -d interview_simulator -f schema.sql
+# Run the schema
+psql -U postgres -d interview_simulator -f schema.sql
 ```
 
 ### 3. Backend Setup
-
-Open a terminal and navigate to the `backend` directory.
-
 ```bash
 cd backend
-```
 
-Create a virtual environment and activate it:
-
-```bash
+# Create & activate virtual environment
 python -m venv venv
+source venv/bin/activate # Windows: venv\Scripts\activate
 
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
-```
-
-Install the required Python dependencies:
-
-```bash
+# Install dependencies
 pip install -r requirements.txt
+
+# Configure Environment
+cp .env.example .env
+# Edit .env and add your GEMINI_API_KEY and DATABASE_URL
 ```
-
-#### Environment Variables (Backend)
-
-Create a `.env` file in the `backend` directory (you can use the provided `env.example (1).txt` as a reference):
-
-```bash
-cp "env.example (1).txt" .env
-```
-
-Edit the `.env` file and fill in your details:
-
-```env
-# Database Connection (update user/password as needed)
-DATABASE_URL=postgresql://postgres:your_password@localhost:5432/interview_simulator
-
-# JWT Configuration
-JWT_SECRET=your_super_secret_jwt_key
-JWT_ALGORITHM=HS256
-JWT_EXPIRE_MINUTES=1440
-
-# LLM Provider Configuration (Provide ONE of these)
-OPENAI_API_KEY=your_openai_api_key
-# GEMINI_API_KEY=your_gemini_api_key
-
-# File Storage
-RESUME_UPLOAD_DIR=./uploads/resumes
-
-# Frontend Origin for CORS
-FRONTEND_ORIGIN=http://localhost:5173
-```
-
-*Note: Ensure the `uploads/resumes` directory exists or the backend is configured to create it automatically.*
-
-Start the FastAPI server:
-
-```bash
-cd app
-uvicorn main:app --reload
-```
-The backend API will be available at `http://localhost:8000`. You can view the interactive API documentation at `http://localhost:8000/docs`.
 
 ### 4. Frontend Setup
-
-Open a **new** terminal and navigate to the `ai-interview` directory (Frontend).
-
 ```bash
 cd ai-interview
-```
-
-Install the Node.js dependencies:
-
-```bash
 npm install
+
+# Configure Environment
+echo "VITE_API_URL=http://localhost:8000/api" > .env
 ```
 
-#### Environment Variables (Frontend)
+---
 
-If required, create a `.env` file in the `ai-interview` directory to set the backend API URL (Vite uses `VITE_` prefix):
+## 🏃 Running the Application
 
-```env
-VITE_API_BASE_URL=http://localhost:8000
-```
-
-Start the Vite development server:
-
+**Start Backend (Terminal 1):**
 ```bash
+cd backend
+uvicorn app.main:app --reload
+```
+
+**Start Frontend (Terminal 2):**
+```bash
+cd ai-interview
 npm run dev
 ```
-The frontend application will be available at `http://localhost:5173`.
+The app will be live at `http://localhost:5173`.
+
+---
+
+## 🧪 Testing
+
+This project follows strict TDD principles and includes comprehensive test suites.
+
+**Frontend Tests:**
+```bash
+cd ai-interview
+npm test
+```
+
+**Backend Tests:**
+```bash
+cd backend
+pytest
+```
+
+---
 
 ## 📁 Project Structure
 
-```
-.
+```text
 ├── ai-interview/          # React Frontend (Vite + Tailwind)
-│   ├── src/               # React components, pages, context, services
-│   ├── package.json       # Node dependencies
-│   └── vite.config.js     # Vite configuration
+│   ├── src/               # UI components, pages, context, and API services
+│   ├── tests/             # Vitest test suites
+│   └── vite.config.js     # Testing and build configuration
 ├── backend/               # FastAPI Backend
-│   ├── app/               # Core application code (routes, models, schemas, services)
-│   ├── requirements.txt   # Python dependencies
-│   └── .env               # Backend environment variables
+│   ├── app/               # Core logic (routes, models, services, schemas)
+│   ├── tests/             # Pytest backend suites
+│   └── requirements.txt   # Python dependency manifest
 ├── schema.sql             # PostgreSQL Database Schema
-├── PRD.md                # Product Requirements Document
-├── PROMPTS.md             # LLM Prompt Templates used for the AI logic
-├── TASKS.md               # Build checklist and project tracking
-└── CLAUDE.md              # Project specifications and architecture
+├── PRD.md                # Full Product Requirements Document
+└── TASKS.md               # Implementation roadmap and status
 ```
+
+---
 
 ## 📝 Usage Notes
+*   **Admin Access:** Insert your first admin user via the provided Python utility or SQL query tool to access management features.
+*   **Security:** This project utilizes JWT authentication and encodes sensitive database credentials for maximum safety.
 
-* **Admin Access:** To log in as an Admin, you will need to manually insert an admin record into the `admins` table in your PostgreSQL database, ensuring the password is hashed correctly according to your backend implementation.
-* **LLM Costs:** Please monitor your OpenAI/Gemini API usage as generating multi-turn interviews and comprehensive reports consumes tokens.
+---
+*Built as an independent internship project for PositiveWay Solutions Pvt. Ltd.*
