@@ -20,7 +20,7 @@ const MOCK_ADMIN = {
 const MOCK_RESUME = {
   id: 1,
   user_id: 1,
-  file_path: 'uploads/resumes/vinod_resume.pdf',
+  file_path: 'uploads/resumes/sample_resume.pdf',
   uploaded_at: '2026-07-16T14:20:00Z',
   parsed_json: {
     name: 'siddhant purohit',
@@ -324,7 +324,7 @@ export async function getAdminDashboard() {
 export async function getAdminUsers() {
   await delay(500);
   return [
-    { id: 1, name: 'Vinod Sharma', email: 'vinod@example.com', interviews: 3, avg_score: 75, joined: '2026-07-15' },
+    { id: 1, name: 'Candidate One', email: 'candidate1@example.com', interviews: 3, avg_score: 75, joined: '2026-07-15' },
     { id: 2, name: 'Priya Mehta', email: 'priya@example.com', interviews: 5, avg_score: 82, joined: '2026-07-10' },
     { id: 3, name: 'Rahul Gupta', email: 'rahul@example.com', interviews: 2, avg_score: 68, joined: '2026-07-12' },
     { id: 4, name: 'Ananya Singh', email: 'ananya@example.com', interviews: 4, avg_score: 71, joined: '2026-07-08' },
