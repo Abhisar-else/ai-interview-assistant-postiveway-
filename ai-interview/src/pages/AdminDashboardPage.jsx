@@ -186,14 +186,6 @@ export default function AdminDashboardPage() {
             {/* Recent Activity Table */}
             <Card title="Recent Interview Activity" subtitle="Live Stream" padding="md">
               <div className={styles.tableWrapper}>
-{catActionError && (
-  <p
-    className={styles.emptyText}
-    style={{ color: 'var(--color-alert-coral)' }}
-  >
-    {catActionError}
-  </p>
-)}
                 <table className={styles.table}>
                   <thead>
                     <tr>
@@ -237,6 +229,11 @@ export default function AdminDashboardPage() {
                 + Add New Category Preset
               </Button>
             </div>
+            {catActionError && (
+              <p className={styles.emptyText} style={{ color: 'var(--color-alert-coral)' }}>
+                {catActionError}
+              </p>
+            )}
 
             <div className={styles.tableWrapper}>
               <table className={styles.table}>

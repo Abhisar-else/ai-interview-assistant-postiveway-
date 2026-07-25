@@ -63,8 +63,8 @@ const MOCK_SESSIONS = [
     job_role: 'Software Engineer',
     interview_type: 'Technical',
     difficulty: 'Medium',
-    overall_score: 82,
     status: 'completed',
+    overall_score: 82,
     started_at: '2026-07-20T09:00:00Z',
     completed_at: '2026-07-20T09:35:00Z',
     transcript: [

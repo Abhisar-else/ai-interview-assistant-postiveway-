@@ -41,16 +41,12 @@ export default function DashboardPage() {
   };
 
   const completedSessions = sessions.filter((s) => s.status === 'completed');
-  const latestReportSession = completedSessions[0];
   const scoredSessions = completedSessions.filter((s) => s.overall_score != null);
-
-const latestScore = scoredSessions.length > 0 
-  ? Math.round(scoredSessions[0].overall_score) 
-  : null;
-
-const highestScore = scoredSessions.length > 0
-  ? Math.round(Math.max(...scoredSessions.map((s) => s.overall_score)))
-  : null;
+  // History is ordered most-recent-first, so the first scored session is the latest.
+  const latestScore = scoredSessions.length > 0 ? Math.round(scoredSessions[0].overall_score) : null;
+  const highestScore = scoredSessions.length > 0
+    ? Math.round(Math.max(...scoredSessions.map((s) => s.overall_score)))
+    : null;
 
   if (loading) {
     return (
