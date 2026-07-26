@@ -30,7 +30,7 @@ CREATE TABLE resumes (
 CREATE TABLE interview_categories (
     id SERIAL PRIMARY KEY,
     job_role VARCHAR(50) NOT NULL,
-     target_company VARCHAR(100),
+    target_company VARCHAR(100),
     interview_type VARCHAR(20) NOT NULL,
     difficulty VARCHAR(20) NOT NULL,
     active BOOLEAN DEFAULT TRUE
@@ -54,7 +54,7 @@ CREATE TABLE interview_reports (
     id SERIAL PRIMARY KEY,
     session_id INTEGER REFERENCES interview_sessions(id) ON DELETE CASCADE,
     overall_score NUMERIC(5,2),
-    ats_score NUMERIC(5,2),               -- ADD THIS LINE
+    ats_score NUMERIC(5,2),              
     technical_score NUMERIC(5,2),
     communication_score NUMERIC(5,2),
     problem_solving_score NUMERIC(5,2),
