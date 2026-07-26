@@ -37,6 +37,10 @@ export default function ReportPage() {
     loadReportData();
   }, [id]);
 
+  const handleDownload = () => {
+    window.print();
+  };
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -57,7 +61,10 @@ export default function ReportPage() {
             {session?.job_role} • {session?.interview_type} • {session?.difficulty} • Generated {new Date(report?.generated_at).toLocaleDateString()}
           </p>
         </div>
-        <div className={styles.headerActions}>
+        <div className={`${styles.headerActions} no-print`}>
+          <Button variant="ghost" onClick={handleDownload} className={styles.downloadButton}>
+            Download PDF ↓
+          </Button>
           <Button variant="ghost" onClick={() => navigate('/')}>
             ← Dashboard
           </Button>

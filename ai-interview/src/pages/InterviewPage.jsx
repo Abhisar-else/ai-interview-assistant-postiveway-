@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as api from '../services/api';
+import useVoice from '../hooks/useVoice';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import Modal from '../components/ui/Modal';
@@ -22,7 +23,9 @@ export default function InterviewPage() {
   const [showEndModal, setShowEndModal] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
 
+  const { supported, isListening, speak, startListening, stopListening, cancelSpeech } = useVoice();
   const historyEndRef = useRef(null);
 
   // Load session data
@@ -49,10 +52,36 @@ export default function InterviewPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-scroll history
+  // Auto-scroll history & Auto-speak AI questions
   useEffect(() => {
     historyEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [transcript]);
+
+    // If voice is enabled and the last message is from AI, speak it
+    if (voiceEnabled && transcript.length > 0) {
+      const lastMessage = transcript[transcript.length - 1];
+      if (lastMessage.role === 'ai') {
+        speak(lastMessage.content);
+      }
+    }
+  }, [transcript, voiceEnabled, speak]);
+
+  const toggleVoice = () => {
+    if (!voiceEnabled) {
+      setVoiceEnabled(true);
+    } else {
+      setVoiceEnabled(false);
+      cancelSpeech();
+      if (isListening) stopListening();
+    }
+  };
+
+  const handleMicClick = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening((text) => setAnswerText(text));
+    }
+  };
 
   const formatTimer = (totalSeconds) => {
     const mins = Math.floor(totalSeconds / 60);
@@ -131,6 +160,12 @@ export default function InterviewPage() {
         </div>
 
         <div className={styles.headerRight}>
+          {supported && (
+            <label className={styles.voiceToggle}>
+              <input type="checkbox" checked={voiceEnabled} onChange={toggleVoice} />
+              <span className={styles.voiceLabel}>Voice Mode</span>
+            </label>
+          )}
           <div className={`${styles.timer} data-text`}>
             ⏱ {formatTimer(elapsedSeconds)}
           </div>
@@ -163,15 +198,32 @@ export default function InterviewPage() {
                 disabled={thinking}
                 rows={3}
               />
-              <Button
-                type="submit"
-                variant="accent"
-                size="md"
-                disabled={!answerText.trim() || thinking}
-                className={styles.sendButton}
-              >
-                Send Answer ▸
-              </Button>
+              <div className={styles.formActions}>
+                {voiceEnabled && (
+                  <button
+                    type="button"
+                    className={`${styles.micButton} ${isListening ? styles.micActive : ''}`}
+                    onClick={handleMicClick}
+                    title={isListening ? 'Stop recording' : 'Start dictating'}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                      <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                      <line x1="12" y1="19" x2="12" y2="23"/>
+                      <line x1="8" y1="23" x2="16" y2="23"/>
+                    </svg>
+                  </button>
+                )}
+                <Button
+                  type="submit"
+                  variant="accent"
+                  size="md"
+                  disabled={!answerText.trim() || thinking}
+                  className={styles.sendButton}
+                >
+                  Send Answer ▸
+                </Button>
+              </div>
             </div>
           </form>
         </div>

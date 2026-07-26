@@ -55,6 +55,25 @@
   gap: var(--space-4);
 }
 
+.voiceToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.voiceToggle input {
+  cursor: pointer;
+}
+
+.voiceLabel {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-ink-navy-60);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .timer {
   font-size: var(--text-sm);
   color: var(--color-ink-navy-60);
@@ -127,6 +146,41 @@
 
 .sendButton {
   align-self: flex-end;
+}
+
+.formActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.micButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-fog-dark);
+  color: var(--color-ink-navy-60);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.micButton:hover {
+  background: var(--color-fog-darker);
+  color: var(--color-ink-navy);
+}
+
+.micActive {
+  background: var(--color-alert-coral-light) !important;
+  color: var(--color-alert-coral) !important;
+  animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(209, 80, 63, 0.4); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(209, 80, 63, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(209, 80, 63, 0); }
 }
 
 /* === HISTORY DRAWER === */

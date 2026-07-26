@@ -21,6 +21,37 @@
   justify-content: space-between;
 }
 
+/* === PRINT STYLES === */
+@media print {
+  :global(nav), .downloadButton, :global(.no-print), :global(.backLink) {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  .reportPage {
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+  }
+
+  .mainScoreCard {
+    box-shadow: none !important;
+    border: 1px solid var(--color-fog-darker);
+    break-inside: avoid;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .section {
+    break-inside: avoid;
+  }
+}
+
 .tag {
   font-size: var(--text-xs);
   color: var(--color-ember-amber);
