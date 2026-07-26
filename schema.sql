@@ -23,7 +23,7 @@ CREATE TABLE resumes (
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
     file_path TEXT NOT NULL,
     parsed_text TEXT,
-    parsed_json JSONB,
+    parsed_json JSONB DEFAULT '{}',
     uploaded_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -39,13 +39,13 @@ CREATE TABLE interview_categories (
 CREATE TABLE interview_sessions (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    resume_id INTEGER REFERENCES resumes(id),
+    resume_id INTEGER REFERENCES resumes(id) ON DELETE SET NULL,
     job_role VARCHAR(50) NOT NULL,
     target_company VARCHAR(100),
     interview_type VARCHAR(20) NOT NULL,
     difficulty VARCHAR(20) NOT NULL,
     status VARCHAR(20) DEFAULT 'in_progress',
-    transcript JSONB,
+    transcript JSONB DEFAULT '[]',
     started_at TIMESTAMP DEFAULT NOW(),
     completed_at TIMESTAMP
 );
@@ -59,24 +59,12 @@ CREATE TABLE interview_reports (
     communication_score NUMERIC(5,2),
     problem_solving_score NUMERIC(5,2),
     confidence_score NUMERIC(5,2),
-    strengths TEXT[],
-    improvements TEXT[],
-    recommended_topics TEXT[],
+    strengths JSONB DEFAULT '[]',
+    improvements JSONB DEFAULT '[]',
+    recommended_topics JSONB DEFAULT '[]',
     generated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Indexes for dashboard queries
+-- Indexes for performance
 CREATE INDEX idx_sessions_user ON interview_sessions(user_id);
-CREATE INDEX idx_sessions_status ON interview_sessions(status);
 CREATE INDEX idx_reports_session ON interview_reports(session_id);
-
--- Seed default categories
-INSERT INTO interview_categories (job_role, interview_type, difficulty) VALUES
-('Software Engineer', 'Technical', 'Easy'),
-('Software Engineer', 'Technical', 'Medium'),
-('Software Engineer', 'Technical', 'Hard'),
-('Data Scientist', 'Technical', 'Medium'),
-('AI/ML Engineer', 'Technical', 'Medium'),
-('Backend Developer', 'Technical', 'Medium'),
-('Frontend Developer', 'Technical', 'Medium'),
-('Full Stack Developer', 'Mixed', 'Medium');

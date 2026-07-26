@@ -47,42 +47,67 @@ async def upload_resume(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    print(f"DEBUG: Upload request received from user {current_user['id']}")
     if not file.filename.endswith(".pdf"):
+        print(f"DEBUG: Rejected file {file.filename} - not a PDF")
         raise HTTPException(status_code=400, detail="Only PDF format files are supported.")
 
-    os.makedirs(settings.RESUME_UPLOAD_DIR, exist_ok=True)
-    # Server-generated filename — never build paths from client-supplied
-    # file.filename (a crafted "../../" filename can escape RESUME_UPLOAD_DIR).
-    safe_filename = f"user_{current_user['id']}_{uuid.uuid4().hex}.pdf"
-    file_path = os.path.join(settings.RESUME_UPLOAD_DIR, safe_filename)
+    try:
+        os.makedirs(settings.RESUME_UPLOAD_DIR, exist_ok=True)
+        safe_filename = f"user_{current_user['id']}_{uuid.uuid4().hex}.pdf"
+        file_path = os.path.join(settings.RESUME_UPLOAD_DIR, safe_filename)
 
-    with open(file_path, "wb") as f:
-        content = await file.read()
-        f.write(content)
+        print(f"DEBUG: Saving file to {file_path}")
+        with open(file_path, "wb") as f:
+            content = await file.read()
+            f.write(content)
 
-    # Parse text & JSON using pdfplumber + LLM
-    raw_text, parsed_json = parse_resume(file_path)
+        print(f"DEBUG: Starting PDF parsing...")
+        raw_text, parsed_json = parse_resume(file_path)
 
-    # Delete existing resume for user if any
-    db.query(Resume).filter(Resume.user_id == current_user["id"]).delete()
+        # STRICT VALIDATION: Reject if no interview-relevant info is found
+        skills = parsed_json.get("skills", [])
+        experience = parsed_json.get("experience", [])
+        projects = parsed_json.get("projects", [])
 
-    new_resume = Resume(
-        user_id=current_user["id"],
-        file_path=file_path,
-        parsed_text=raw_text,
-        parsed_json=parsed_json
-    )
-    db.add(new_resume)
-    db.commit()
-    db.refresh(new_resume)
+        if not skills or (not experience and not projects):
+            print("DEBUG: Rejected - Resume missing skills or work history")
+            # Clean up the file
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            raise HTTPException(
+                status_code=400,
+                detail="Resume Rejected: No interview-relevant information (skills, experience, or projects) detected in PDF."
+            )
 
-    return {
-        "id": new_resume.id,
-        "user_id": new_resume.user_id,
-        "file_path": new_resume.file_path,
-        "parsed_json": new_resume.parsed_json,
-        "uploaded_at": new_resume.uploaded_at
-    }
+        print(f"DEBUG: Parsing complete. Skills found: {len(skills)}")
+
+        # Delete existing resume for user if any
+        db.query(Resume).filter(Resume.user_id == current_user["id"]).delete()
+
+        new_resume = Resume(
+            user_id=current_user["id"],
+            file_path=file_path,
+            parsed_text=raw_text,
+            parsed_json=parsed_json
+        )
+        db.add(new_resume)
+        db.commit()
+        db.refresh(new_resume)
+
+        print(f"DEBUG: Resume record saved to DB with ID {new_resume.id}")
+        return {
+            "id": new_resume.id,
+            "user_id": new_resume.user_id,
+            "file_path": new_resume.file_path,
+            "parsed_json": new_resume.parsed_json,
+            "uploaded_at": new_resume.uploaded_at
+        }
+    except Exception as e:
+        print(f"DEBUG: ERROR during upload: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.get("/resume")
 @router.get("/resume/status")

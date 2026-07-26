@@ -28,6 +28,21 @@ export default function DashboardPage() {
   const [profileError, setProfileError] = useState('');
 
   useEffect(() => {
+    // Prevent browser from opening dropped files globally while on dashboard
+    const preventDefault = (e) => {
+      if (e.dataTransfer && e.dataTransfer.types.includes('Files')) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('dragover', preventDefault);
+    window.addEventListener('drop', preventDefault);
+    return () => {
+      window.removeEventListener('dragover', preventDefault);
+      window.removeEventListener('drop', preventDefault);
+    };
+  }, []);
+
+  useEffect(() => {
     async function loadDashboardData() {
       try {
         const [resumeData, sessionsData, profileData] = await Promise.all([
@@ -71,8 +86,13 @@ export default function DashboardPage() {
   };
 
   const handleResumeUpload = async (file) => {
-    const updated = await api.uploadResume(file);
-    setResume(updated);
+    try {
+      const updated = await api.uploadResume(file);
+      setResume(updated);
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('Failed to upload/parse resume. Check your backend console and .env API key.');
+    }
   };
 
   const completedSessions = sessions.filter((s) => s.status === 'completed');

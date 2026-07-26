@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
   }, [token]);
 
   const login = useCallback(async (email, password) => {
-    const { user: userData, token: newToken } = await api.loginUser(email, password);
+    const { user: userData, access_token: newToken } = await api.loginUser(email, password);
     localStorage.setItem('token', newToken);
     localStorage.setItem('isAdmin', 'false');
     setToken(newToken);
@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const adminLogin = useCallback(async (email, password) => {
-    const { user: userData, token: newToken } = await api.loginAdmin(email, password);
+    const { user: userData, access_token: newToken } = await api.loginAdmin(email, password);
     localStorage.setItem('token', newToken);
     localStorage.setItem('isAdmin', 'true');
     setToken(newToken);
@@ -47,7 +47,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const register = useCallback(async (data) => {
-    const { user: userData, token: newToken } = await api.registerUser(data);
+    const { user: userData, access_token: newToken } = await api.registerUser(data);
     localStorage.setItem('token', newToken);
     localStorage.setItem('isAdmin', 'false');
     setToken(newToken);

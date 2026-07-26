@@ -211,20 +211,20 @@ const delay = (ms = 600) => new Promise(resolve => setTimeout(resolve, ms));
 export async function loginUser(email, password) {
   await delay(800);
   if (email && password) {
-    return { user: MOCK_USER, token: 'mock-jwt-token-' + Date.now() };
+    return { user: MOCK_USER, access_token: 'mock-jwt-token-' + Date.now() };
   }
   throw new Error('Invalid credentials');
 }
 
 export async function registerUser(data) {
   await delay(800);
-  return { user: { ...MOCK_USER, ...data, id: 2 }, token: 'mock-jwt-token-' + Date.now() };
+  return { user: { ...MOCK_USER, ...data, id: 2 }, access_token: 'mock-jwt-token-' + Date.now() };
 }
 
 export async function loginAdmin(email, password) {
   await delay(800);
   if (email && password) {
-    return { user: MOCK_ADMIN, token: 'mock-admin-jwt-' + Date.now() };
+    return { user: MOCK_ADMIN, access_token: 'mock-admin-jwt-' + Date.now() };
   }
   throw new Error('Invalid credentials');
 }

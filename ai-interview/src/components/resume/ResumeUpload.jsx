@@ -10,11 +10,18 @@ export default function ResumeUpload({ resume, onUpload }) {
 
   const handleDrop = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     setDragging(false);
     const file = e.dataTransfer.files[0];
     if (file && file.type === 'application/pdf') {
       await handleUpload(file);
     }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(true);
   };
 
   const handleFileChange = async (e) => {
@@ -67,40 +74,41 @@ export default function ResumeUpload({ resume, onUpload }) {
   return (
     <div
       className={`${styles.dropzone} ${dragging ? styles.dragging : ''}`}
-      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragOver}
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
-      onClick={() => fileRef.current?.click()}
     >
-      <input
-        ref={fileRef}
-        type="file"
-        accept=".pdf"
-        onChange={handleFileChange}
-        className={styles.fileInput}
-      />
+      <label className={styles.label}>
+        <input
+          type="file"
+          accept=".pdf"
+          onChange={handleFileChange}
+          className={styles.fileInput}
+        />
 
-      {uploading ? (
-        <div className={styles.uploading}>
-          <div className={styles.progressBar}>
-            <div className={styles.progressFill} />
+        {uploading ? (
+          <div className={styles.uploading}>
+            <div className={styles.progressBar}>
+              <div className={styles.progressFill} />
+            </div>
+            <span className="data-text">Processing Resume...</span>
           </div>
-          <span className="data-text">Uploading & parsing...</span>
-        </div>
-      ) : (
-        <>
-          <div className={styles.uploadIcon}>
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <path d="M16 20V8m0 0l-5 5m5-5l5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M6 22v4a2 2 0 002 2h16a2 2 0 002-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
+        ) : (
+          <div className={styles.uploadContent}>
+            <div className={styles.uploadIcon}>
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <path d="M16 20V8m0 0l-5 5m5-5l5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M6 22v4a2 2 0 002 2h16a2 2 0 002-2v-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <p className={styles.dropText}>
+              <span className={styles.link}>Click to choose file</span>
+            </p>
+            <p className={styles.hint}>or drop PDF anywhere in this area</p>
           </div>
-          <p className={styles.dropText}>
-            Drop your resume here or <span className={styles.link}>browse</span>
-          </p>
-          <p className={styles.hint}>PDF format only</p>
-        </>
-      )}
+        )}
+      </label>
     </div>
   );
 }

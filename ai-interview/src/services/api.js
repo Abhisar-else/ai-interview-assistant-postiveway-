@@ -11,14 +11,18 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Inject JWT token into every request
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Global response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('isAdmin');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
 // --- Auth ---
 export async function loginUser(email, password) {

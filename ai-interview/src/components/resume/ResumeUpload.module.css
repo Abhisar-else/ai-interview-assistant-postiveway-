@@ -1,11 +1,23 @@
 .dropzone {
   border: 2px dashed var(--color-ink-navy-30);
   border-radius: var(--radius-lg);
-  padding: var(--space-8);
-  text-align: center;
-  cursor: pointer;
   transition: all var(--duration-normal) var(--ease-out);
   background: var(--color-fog);
+  position: relative;
+}
+
+.label {
+  display: block;
+  padding: var(--space-8);
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.uploadContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .dropzone:hover {

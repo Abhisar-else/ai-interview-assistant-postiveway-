@@ -45,17 +45,18 @@ def call_llm(system_prompt: str, user_prompt: str, json_only: bool = False) -> s
 
 def get_fallback_llm_response(system_prompt: str, user_prompt: str, json_only: bool) -> str:
     if "convert raw resume text into structured json" in system_prompt.lower():
+        # Return a generic 'Offline' resume so the user knows the API key is missing
         return json.dumps({
-            "name": "Candidate",
-            "skills": ["JavaScript", "React", "Python", "FastAPI", "PostgreSQL", "Git", "REST APIs"],
+            "name": "Offline Mode Candidate",
+            "skills": ["Communication", "General Problem Solving", "Note: GEMINI_API_KEY Missing"],
             "projects": [
-                {"title": "Full Stack Web App", "description": "Interactive web application with responsive UI and REST backend", "tech": ["React", "FastAPI"]}
+                {"title": "Setup Required", "description": "Please add your Gemini API Key to the .env file to enable AI parsing.", "tech": ["System"]}
             ],
             "experience": [
-                {"role": "Software Developer Intern", "company": "Tech Firm", "duration": "6 months", "highlights": ["Engineered core user features", "Optimized database queries"]}
+                {"role": "Local Developer", "company": "Offline Environment", "duration": "N/A", "highlights": ["Running in fallback mode"]}
             ],
             "education": [
-                {"degree": "B.Tech Computer Science", "institution": "University", "year": "2026"}
+                {"degree": "System Check", "institution": "Simulator", "year": "2026"}
             ]
         })
     elif "evaluating a completed mock interview" in system_prompt.lower() or json_only:
