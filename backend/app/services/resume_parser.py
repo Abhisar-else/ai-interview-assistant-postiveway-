@@ -20,7 +20,8 @@ def extract_text_from_pdf(file_path: str) -> str:
     extracted_text = ""
     try:
         with pdfplumber.open(file_path) as pdf:
-            for page in pdf.pages:
+            # SAFETY LIMIT: Only parse first 5 pages to prevent OOM/DoS
+            for page in pdf.pages[:5]:
                 text = page.extract_text()
                 if text:
                     extracted_text += text + "\n"

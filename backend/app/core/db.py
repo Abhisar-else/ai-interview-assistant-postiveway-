@@ -11,12 +11,17 @@ if db_url.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
 
 try:
-    engine = create_engine(db_url, connect_args=connect_args, pool_pre_ping=True)
+    engine = create_engine(
+        db_url,
+        connect_args=connect_args,
+        pool_pre_ping=True,
+        pool_size=10,
+        max_overflow=20,
+        pool_recycle=3600
+    )
 except Exception as e:
-    # Fallback to local SQLite if PostgreSQL fails connection
-    print(f"Warning: Database connection to {db_url} failed ({e}). Falling back to SQLite.")
-    db_url = "sqlite:///./interview_simulator.db"
-    engine = create_engine(db_url, connect_args={"check_same_thread": False})
+    # Fail fast in production
+    raise RuntimeError(f"CRITICAL: Database connection to {db_url} failed: {e}")
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

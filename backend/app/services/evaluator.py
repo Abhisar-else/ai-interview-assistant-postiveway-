@@ -47,6 +47,15 @@ Full Interview Transcript:
 
     try:
         report_data = json.loads(cleaned_output)
+        # Type Coercion: Ensure all scores are numeric to prevent DB crashes
+        for key in ["overall_score", "ats_score", "technical_score", "communication_score", "problem_solving_score", "confidence_score"]:
+            if key in report_data:
+                try:
+                    # Strip any '%' if present and convert to float
+                    val = str(report_data[key]).replace('%', '').strip()
+                    report_data[key] = float(val)
+                except:
+                    report_data[key] = 75.0
     except Exception:
         report_data = {
             "overall_score": 75,

@@ -28,24 +28,22 @@ def get_admin_dashboard(
         {"role": role, "count": count} for role, count in role_counts
     ]
 
-    # Recent activity
-    recent_sessions = (
-        db.query(InterviewSession)
+    # Recent activity - Optimized with JOIN to prevent N+1
+    recent_activity_data = (
+        db.query(InterviewSession, User.name, InterviewReport.overall_score)
+        .outerjoin(User, User.id == InterviewSession.user_id)
+        .outerjoin(InterviewReport, InterviewReport.session_id == InterviewSession.id)
         .order_by(InterviewSession.started_at.desc())
         .limit(5)
         .all()
     )
 
-    recent_activity = []
-    for sess in recent_sessions:
-        u = db.query(User).filter(User.id == sess.user_id).first()
-        r = db.query(InterviewReport).filter(InterviewReport.session_id == sess.id).first()
-        recent_activity.append({
-            "user": u.name if u else "Candidate",
-            "role": sess.job_role,
-            "score": float(r.overall_score) if r else 75,
-            "date": sess.started_at.strftime("%Y-%m-%d")
-        })
+    recent_activity = [{
+        "user": name if name else "Candidate",
+        "role": sess.job_role,
+        "score": float(score) if score else 75,
+        "date": sess.started_at.strftime("%Y-%m-%d")
+    } for sess, name, score in recent_activity_data]
 
     return {
         "total_users": total_users,
@@ -60,50 +58,51 @@ def get_admin_users(
     admin: dict = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
-    users = db.query(User).all()
-    user_list = []
-    for u in users:
-        sess_count = db.query(func.count(InterviewSession.id)).filter(InterviewSession.user_id == u.id).scalar() or 0
-        avg_score_raw = (
-            db.query(func.avg(InterviewReport.overall_score))
-            .join(InterviewSession, InterviewSession.id == InterviewReport.session_id)
-            .filter(InterviewSession.user_id == u.id)
-            .scalar()
+    # Optimized Join Query to fetch everything in ONE hit
+    stats = (
+        db.query(
+            User.id, User.name, User.email, User.created_at,
+            func.count(InterviewSession.id).label("sessions"),
+            func.avg(InterviewReport.overall_score).label("avg_score")
         )
-        user_list.append({
-            "id": u.id,
-            "name": u.name,
-            "email": u.email,
-            "interviews": sess_count,
-            "avg_score": round(float(avg_score_raw), 1) if avg_score_raw else 75,
-            "joined": u.created_at.strftime("%Y-%m-%d")
-        })
-    return user_list
+        .outerjoin(InterviewSession, User.id == InterviewSession.user_id)
+        .outerjoin(InterviewReport, InterviewReport.session_id == InterviewSession.id)
+        .group_by(User.id)
+        .all()
+    )
+
+    return [{
+        "id": s.id,
+        "name": s.name,
+        "email": s.email,
+        "interviews": s.sessions,
+        "avg_score": round(float(s.avg_score), 1) if s.avg_score else 75,
+        "joined": s.created_at.strftime("%Y-%m-%d")
+    } for s in stats]
 
 @router.get("/interviews")
 def get_admin_interviews(
     admin: dict = Depends(get_current_admin),
     db: Session = Depends(get_db)
 ):
-    sessions = (
-        db.query(InterviewSession)
+    # Optimized with JOINs
+    sessions_data = (
+        db.query(InterviewSession, User.name, InterviewReport.overall_score)
+        .outerjoin(User, User.id == InterviewSession.user_id)
+        .outerjoin(InterviewReport, InterviewReport.session_id == InterviewSession.id)
         .order_by(InterviewSession.started_at.desc())
         .all()
     )
-    results = []
-    for s in sessions:
-        u = db.query(User).filter(User.id == s.user_id).first()
-        r = db.query(InterviewReport).filter(InterviewReport.session_id == s.id).first()
-        results.append({
-            "id": s.id,
-            "user_name": u.name if u else "Candidate",
-            "job_role": s.job_role,
-            "type": s.interview_type,
-            "status": s.status,
-            "score": float(r.overall_score) if r else None,
-            "date": s.started_at.strftime("%Y-%m-%d")
-        })
-    return results
+
+    return [{
+        "id": s.id,
+        "user_name": name if name else "Candidate",
+        "job_role": s.job_role,
+        "type": s.interview_type,
+        "status": s.status,
+        "score": float(score) if score else None,
+        "date": s.started_at.strftime("%Y-%m-%d")
+    } for s, name, score in sessions_data]
 
 @router.get("/interviews/{session_id}/report")
 def get_admin_interview_report(

@@ -1,6 +1,9 @@
 from datetime import datetime
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy.dialects.postgresql import insert
 from app.core.db import get_db
 from app.core.security import get_current_user
 from app.models.models import InterviewSession, InterviewReport, Resume
@@ -8,6 +11,7 @@ from app.schemas.schemas import InterviewStart, AnswerSubmit, AnswerResponse
 from app.services.ai_interviewer import generate_next_question
 from app.services.evaluator import generate_performance_report
 
+logger = logging.getLogger("uvicorn.error")
 router = APIRouter(prefix="/interview", tags=["Interview"])
 
 @router.post("/start")
@@ -20,15 +24,19 @@ def start_interview_session(
     resume_summary = resume.parsed_json if resume else {}
 
     # Generate opening question
-    opening_q = generate_next_question(
-        job_role=data.job_role,
-        interview_type=data.interview_type,
-        difficulty=data.difficulty,
-        resume_summary=resume_summary,
-        transcript=[],
-        is_first_turn=True,
-        target_company=data.target_company
-    )
+    try:
+        opening_q = generate_next_question(
+            job_role=data.job_role,
+            interview_type=data.interview_type,
+            difficulty=data.difficulty,
+            resume_summary=resume_summary,
+            transcript=[],
+            is_first_turn=True,
+            target_company=data.target_company
+        )
+    except Exception as e:
+        logger.error(f"Opening question generation failed: {type(e).__name__}")
+        opening_q = "Thank you for joining. To start, could you introduce yourself and walk me through your background?"
 
     initial_transcript = [{"role": "ai", "content": opening_q}]
 
@@ -65,10 +73,11 @@ def submit_answer(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    # Lock the row for update to prevent race conditions during transcript updates
     session = db.query(InterviewSession).filter(
         InterviewSession.id == session_id,
         InterviewSession.user_id == current_user["id"]
-    ).first()
+    ).with_for_update().first()
 
     if not session:
         raise HTTPException(status_code=404, detail="Interview session not found")
@@ -76,29 +85,41 @@ def submit_answer(
     if session.status == "completed":
         raise HTTPException(status_code=400, detail="Interview session is already completed")
 
-    transcript = session.transcript or []
-    # Append user answer
+    transcript = list(session.transcript) if session.transcript else []
+    # Append user answer and COMMIT immediately to prevent data loss during slow AI call
     transcript.append({"role": "user", "content": data.answer})
+    session.transcript = transcript
+    flag_modified(session, "transcript")
+    db.commit()
 
     # Fetch resume summary
     resume = db.query(Resume).filter(Resume.id == session.resume_id).first() if session.resume_id else None
     resume_summary = resume.parsed_json if resume else {}
 
-    # Generate adaptive follow-up question
-    next_q = generate_next_question(
-        job_role=session.job_role,
-        interview_type=session.interview_type,
-        difficulty=session.difficulty,
-        resume_summary=resume_summary,
-        transcript=transcript,
-        is_first_turn=False,
-        target_company=session.target_company
-    )
+    # Generate adaptive follow-up question (Slow external call)
+    try:
+        next_q = generate_next_question(
+            job_role=session.job_role,
+            interview_type=session.interview_type,
+            difficulty=session.difficulty,
+            resume_summary=resume_summary,
+            transcript=transcript,
+            is_first_turn=False,
+            target_company=session.target_company
+        )
+    except Exception as e:
+        logger.error(f"AI Question Generation failed: {type(e).__name__}")
+        # Fallback question if AI fails, so the interview can continue
+        next_q = "That's an interesting point. Can you elaborate more on that, or should we move to the next topic?"
 
+    # Re-fetch/lock to append AI response
+    session = db.query(InterviewSession).filter(InterviewSession.id == session_id).with_for_update().first()
+    transcript = list(session.transcript)
     transcript.append({"role": "ai", "content": next_q})
 
-    # Update transcript in DB
+    # Update transcript with AI response
     session.transcript = transcript
+    flag_modified(session, "transcript")
     db.commit()
 
     return {"question": next_q}
@@ -134,26 +155,26 @@ def complete_interview_session(
         target_company=session.target_company
     )
 
-    # Save to interview_reports table
-    report = db.query(InterviewReport).filter(InterviewReport.session_id == session.id).first()
-    if not report:
-        report = InterviewReport(
-            session_id=session.id,
-            overall_score=report_dict.get("overall_score", 75),
-            ats_score=report_dict.get("ats_score", 70),
-            technical_score=report_dict.get("technical_score", 75),
-            communication_score=report_dict.get("communication_score", 75),
-            problem_solving_score=report_dict.get("problem_solving_score", 75),
-            confidence_score=report_dict.get("confidence_score", 75),
-            strengths=report_dict.get("strengths", []),
-            improvements=report_dict.get("improvements", []),
-            recommended_topics=report_dict.get("recommended_topics", []),
-            generated_at=datetime.utcnow()
-        )
-        db.add(report)
+    # Atomic UPSERT to interview_reports table
+    stmt = insert(InterviewReport).values(
+        session_id=session.id,
+        overall_score=report_dict.get("overall_score", 75),
+        ats_score=report_dict.get("ats_score", 70),
+        technical_score=report_dict.get("technical_score", 75),
+        communication_score=report_dict.get("communication_score", 75),
+        problem_solving_score=report_dict.get("problem_solving_score", 75),
+        confidence_score=report_dict.get("confidence_score", 75),
+        strengths=report_dict.get("strengths", []),
+        improvements=report_dict.get("improvements", []),
+        recommended_topics=report_dict.get("recommended_topics", []),
+        generated_at=datetime.utcnow()
+    ).on_conflict_do_nothing(index_elements=['session_id'])
 
+    db.execute(stmt)
     db.commit()
-    db.refresh(report)
+
+    # Fetch the report (whether newly created or existing)
+    report = db.query(InterviewReport).filter(InterviewReport.session_id == session.id).first()
 
     return {
         "id": report.id,

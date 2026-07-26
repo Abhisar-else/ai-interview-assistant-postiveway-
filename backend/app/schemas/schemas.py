@@ -1,16 +1,16 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List, Any, Dict
 from datetime import datetime
 
 # --- Auth & User ---
 class UserRegister(BaseModel):
-    name: str
-    email: str
-    password: str
-    phone: Optional[str] = None
+    name: str = Field(..., min_length=2, max_length=100)
+    email: EmailStr
+    password: str = Field(..., min_length=8)
+    phone: Optional[str] = Field(None, max_length=20)
 
 class UserLogin(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 class TokenResponse(BaseModel):
@@ -29,8 +29,8 @@ class UserOut(BaseModel):
         from_attributes = True
 
 class ProfileUpdate(BaseModel):
-    name: Optional[str] = None
-    phone: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=2, max_length=100)
+    phone: Optional[str] = Field(None, max_length=20)
 
 # --- Resume ---
 class ResumeOut(BaseModel):
@@ -45,13 +45,13 @@ class ResumeOut(BaseModel):
 
 # --- Interview ---
 class InterviewStart(BaseModel):
-    job_role: str
-    target_company: Optional[str] = None
-    interview_type: str
-    difficulty: str
+    job_role: str = Field(..., min_length=2, max_length=50)
+    target_company: Optional[str] = Field(None, max_length=100)
+    interview_type: str = Field(..., pattern="^(Technical|HR|Mixed|Coding)$")
+    difficulty: str = Field(..., pattern="^(Easy|Medium|Hard)$")
 
 class AnswerSubmit(BaseModel):
-    answer: str
+    answer: str = Field(..., min_length=1, max_length=5000)
 
 class AnswerResponse(BaseModel):
     question: str
@@ -93,16 +93,16 @@ class ReportOut(BaseModel):
 
 # --- Categories ---
 class CategoryCreate(BaseModel):
-    job_role: str
-    target_company: Optional[str] = None
-    interview_type: str
-    difficulty: str
+    job_role: str = Field(..., min_length=2, max_length=50)
+    target_company: Optional[str] = Field(None, max_length=100)
+    interview_type: str = Field(..., pattern="^(Technical|HR|Mixed|Coding)$")
+    difficulty: str = Field(..., pattern="^(Easy|Medium|Hard)$")
 
 class CategoryUpdate(BaseModel):
-    job_role: Optional[str] = None
-    target_company: Optional[str] = None
-    interview_type: Optional[str] = None
-    difficulty: Optional[str] = None
+    job_role: Optional[str] = Field(None, min_length=2, max_length=50)
+    target_company: Optional[str] = Field(None, max_length=100)
+    interview_type: Optional[str] = Field(None, pattern="^(Technical|HR|Mixed|Coding)$")
+    difficulty: Optional[str] = Field(None, pattern="^(Easy|Medium|Hard)$")
     active: Optional[bool] = None
 
 class CategoryOut(BaseModel):
