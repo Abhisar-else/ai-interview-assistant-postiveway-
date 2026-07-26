@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional, List, Any, Dict
 from datetime import datetime
 
@@ -19,14 +19,13 @@ class TokenResponse(BaseModel):
     user: Dict[str, Any]
 
 class UserOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     email: str
     phone: Optional[str] = None
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class ProfileUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=2, max_length=100)
@@ -34,14 +33,13 @@ class ProfileUpdate(BaseModel):
 
 # --- Resume ---
 class ResumeOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     user_id: int
     file_path: str
     parsed_json: Optional[Dict[str, Any]] = None
     uploaded_at: datetime
-
-    class Config:
-        from_attributes = True
 
 # --- Interview ---
 class InterviewStart(BaseModel):
@@ -57,6 +55,8 @@ class AnswerResponse(BaseModel):
     question: str
 
 class SessionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     user_id: int
     job_role: str
@@ -70,11 +70,10 @@ class SessionOut(BaseModel):
     started_at: datetime
     completed_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 # --- Report ---
 class ReportOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     session_id: int
     overall_score: float
@@ -87,9 +86,6 @@ class ReportOut(BaseModel):
     improvements: List[str]
     recommended_topics: List[str]
     generated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 # --- Categories ---
 class CategoryCreate(BaseModel):
@@ -106,12 +102,11 @@ class CategoryUpdate(BaseModel):
     active: Optional[bool] = None
 
 class CategoryOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     job_role: str
     target_company: Optional[str] = None
     interview_type: str
     difficulty: str
     active: bool
-
-    class Config:
-        from_attributes = True

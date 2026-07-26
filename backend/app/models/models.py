@@ -1,7 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Text, Boolean, Numeric, DateTime, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from app.core.db import Base
+
+def utcnow():
+    return datetime.now(timezone.utc)
 
 class Admin(Base):
     __tablename__ = "admins"
@@ -10,7 +13,7 @@ class Admin(Base):
     name = Column(String(100), nullable=False)
     email = Column(String(150), unique=True, nullable=False, index=True)
     password_hash = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utcnow)
 
 class User(Base):
     __tablename__ = "users"
@@ -20,7 +23,7 @@ class User(Base):
     email = Column(String(150), unique=True, nullable=False, index=True)
     password_hash = Column(Text, nullable=False)
     phone = Column(String(20), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utcnow)
 
     resumes = relationship("Resume", back_populates="user", cascade="all, delete-orphan")
     sessions = relationship("InterviewSession", back_populates="user", cascade="all, delete-orphan")
@@ -33,7 +36,7 @@ class Resume(Base):
     file_path = Column(Text, nullable=False)
     parsed_text = Column(Text, nullable=True)
     parsed_json = Column(JSON, nullable=True)
-    uploaded_at = Column(DateTime, default=datetime.utcnow)
+    uploaded_at = Column(DateTime, default=utcnow)
 
     user = relationship("User", back_populates="resumes")
     sessions = relationship("InterviewSession", back_populates="resume")
@@ -60,7 +63,7 @@ class InterviewSession(Base):
     difficulty = Column(String(20), nullable=False)
     status = Column(String(20), default="in_progress", index=True)
     transcript = Column(JSON, nullable=True)
-    started_at = Column(DateTime, default=datetime.utcnow)
+    started_at = Column(DateTime, default=utcnow)
     completed_at = Column(DateTime, nullable=True)
 
     user = relationship("User", back_populates="sessions")
@@ -81,6 +84,6 @@ class InterviewReport(Base):
     strengths = Column(JSON, nullable=True)         # JSON list of strings
     improvements = Column(JSON, nullable=True)      # JSON list of strings
     recommended_topics = Column(JSON, nullable=True)# JSON list of strings
-    generated_at = Column(DateTime, default=datetime.utcnow)
+    generated_at = Column(DateTime, default=utcnow)
 
     session = relationship("InterviewSession", back_populates="report")

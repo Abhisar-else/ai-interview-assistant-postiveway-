@@ -47,16 +47,16 @@ Work top to bottom. Each block is roughly one focused session. Check items off a
 - [x] Responsive check (mobile breakpoints on chat + dashboards)
 - [x] Error states (upload failure, LLM timeout, empty history)
 - [x] Score Trend Visualization on Dashboard
-- [x] README with setup/run instructions
+- [x] README with setup/run instructions & Deployment guide
 - [x] Push to GitHub, verify no secrets committed
 - [x] Final PRD-format documentation
 
-## Explicitly deferred (do not build unless all above is done early)
-Voice interview, ATS score, PDF export, multi-language.
+## Completed Features & Upgrades
+- [x] **Interview Focus Guard** (Tab switch detection, `⚠ Focus lost ×N` badge, nav & window interception)
+- [x] **Google Gen AI SDK Migration** (`google-genai` v2.14+, `gemini-3.5-flash`, `AQ.` key support)
+- [x] **Voice Mode** (Speech Recognition dictation & Speech Synthesis audio output via `useVoice`)
+- [x] **ATS Resume Match Score** integration across full stack & report visualization
+- [x] **PDF Report Download / Export** (`window.print()` clean print stylesheet)
+- [x] **Adaptive Probing Logic** in AI Interviewer & Offline fallback rotation
+- [x] **Company-Specific Training** (Target company customization)
 
-## Completed Extra Features
-- [x] ATS Resume Match Score integration across full stack
-- [x] Adaptive follow-up probing logic in AI Interviewer
-- [x] Composite performance gauges on Candidate Dashboard
-- [x] Coding Round (logic + UI rendering)
-- [x] Company-Specific Modes (context-aware interviewing)

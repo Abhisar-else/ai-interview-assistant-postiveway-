@@ -1,10 +1,12 @@
 import os
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="allow")
+
     PROJECT_NAME: str = "AI Interview Simulator API"
     VERSION: str = "1.0.0"
     API_PREFIX: str = "/api"
@@ -23,10 +25,6 @@ class Settings(BaseSettings):
 
     RESUME_UPLOAD_DIR: str = os.getenv("RESUME_UPLOAD_DIR", "./uploads/resumes")
     FRONTEND_ORIGIN: str = os.getenv("FRONTEND_ORIGIN", "http://localhost:5173")
-
-    class Config:
-        env_file = ".env"
-        extra = "allow"
 
 settings = Settings()
 

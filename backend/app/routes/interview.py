@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -49,7 +49,7 @@ def start_interview_session(
         difficulty=data.difficulty,
         status="in_progress",
         transcript=initial_transcript,
-        started_at=datetime.utcnow()
+        started_at=datetime.now(timezone.utc)
     )
     db.add(session)
     db.commit()
@@ -139,7 +139,7 @@ def complete_interview_session(
         raise HTTPException(status_code=404, detail="Interview session not found")
 
     session.status = "completed"
-    session.completed_at = datetime.utcnow()
+    session.completed_at = datetime.now(timezone.utc)
 
     # Fetch resume summary
     resume = db.query(Resume).filter(Resume.id == session.resume_id).first() if session.resume_id else None
@@ -167,7 +167,7 @@ def complete_interview_session(
         strengths=report_dict.get("strengths", []),
         improvements=report_dict.get("improvements", []),
         recommended_topics=report_dict.get("recommended_topics", []),
-        generated_at=datetime.utcnow()
+        generated_at=datetime.now(timezone.utc)
     ).on_conflict_do_nothing(index_elements=['session_id'])
 
     db.execute(stmt)
