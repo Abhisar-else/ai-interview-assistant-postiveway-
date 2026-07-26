@@ -21,6 +21,23 @@
   justify-content: space-between;
 }
 
+.violationBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-alert-coral-light);
+  color: var(--color-alert-coral);
+  border: 1px solid var(--color-alert-coral);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.violationIcon {
+  font-size: var(--text-xl);
+}
+
 /* === PRINT STYLES === */
 @media print {
   :global(nav), .downloadButton, :global(.no-print), :global(.backLink) {

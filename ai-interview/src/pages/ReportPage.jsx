@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import * as api from '../services/api';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -14,10 +14,13 @@ import styles from './ReportPage.module.css';
 export default function ReportPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [report, setReport] = useState(null);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const isHardTerminated = new URLSearchParams(location.search).get('violation') === 'hard_terminated';
 
   useEffect(() => {
     async function loadReportData() {
@@ -73,6 +76,15 @@ export default function ReportPage() {
           </Button>
         </div>
       </div>
+
+      {isHardTerminated && (
+        <div className={styles.violationBanner}>
+          <span className={styles.violationIcon}>🚨</span>
+          <div>
+            <strong>Anti-Cheating Protocol Flagged:</strong> This session was automatically terminated because anti-cheating threshold limits (tab switching or copy-pasting answers) were exceeded during viva rehearsal.
+          </div>
+        </div>
+      )}
 
       {/* Main Score Overview: Confidence Needle (Overall) */}
       <Card className={styles.overallCard} padding="lg">

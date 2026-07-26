@@ -29,9 +29,29 @@ export default function InterviewPage() {
   const { supported, isListening, speak, startListening, stopListening, cancelSpeech } = useVoice();
   const historyEndRef = useRef(null);
 
-  // Focus guard — active when session is in progress (not completed/loading)
+  // Hard Anti-Cheat termination callback
+  const handleHardTerminate = useCallback(async () => {
+    setCompleting(true);
+    try {
+      await api.completeInterview(id);
+    } catch (err) {
+      console.error('Failed auto-completion on violation limit:', err);
+    } finally {
+      navigate(`/interview/${id}/report?violation=hard_terminated`);
+    }
+  }, [id, navigate]);
+
+  // Focus & Anti-Cheat Guard — active when session is in progress (not completed/loading)
   const guardActive = !loading && session && session.status !== 'completed';
-  const { tabAwayCount } = useInterviewGuard(guardActive);
+  const {
+    tabAwayCount,
+    violationCount,
+    maxViolations,
+    lastViolationReason,
+    showWarningModal,
+    handlePasteAttempt,
+    dismissWarningModal,
+  } = useInterviewGuard(guardActive, handleHardTerminate);
 
   // Load session data
   useEffect(() => {
@@ -171,7 +191,12 @@ export default function InterviewPage() {
               <span className={styles.voiceLabel}>Voice Mode</span>
             </label>
           )}
-          {tabAwayCount > 0 && (
+          {violationCount > 0 && (
+            <span className={styles.focusWarning} title={`Anti-cheating system detected ${violationCount} violation(s)`}>
+              ⚠️ Violation {violationCount}/{maxViolations}
+            </span>
+          )}
+          {tabAwayCount > 0 && violationCount === 0 && (
             <span className={styles.focusWarning} title={`You switched tabs ${tabAwayCount} time(s) during this interview`}>
               ⚠ Focus lost ×{tabAwayCount}
             </span>
@@ -196,9 +221,10 @@ export default function InterviewPage() {
             <div className={styles.inputWrapper}>
               <textarea
                 className={styles.answerTextarea}
-                placeholder="Type your structured response here... (Press Enter or click Send)"
+                placeholder="Type your response here... (Copy-pasting is disabled to ensure viva evaluation integrity)"
                 value={answerText}
                 onChange={(e) => setAnswerText(e.target.value)}
+                onPaste={handlePasteAttempt}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -274,6 +300,41 @@ export default function InterviewPage() {
           <Button variant="accent" onClick={handleCompleteInterview}>
             End & Generate Report ▸
           </Button>
+        </div>
+      </Modal>
+
+      {/* Hard Anti-Cheat Warning Modal */}
+      <Modal
+        isOpen={showWarningModal}
+        onClose={dismissWarningModal}
+        title="⚠️ ANTI-CHEATING PROTOCOL ALARM"
+      >
+        <div className={styles.cheatModalContent}>
+          <div className={styles.cheatHeaderBox}>
+            <span className={styles.cheatBadge}>VIOLATION DETECTED</span>
+            <span className={styles.cheatDots}>
+              {Array.from({ length: maxViolations }).map((_, i) => (
+                <span key={i} className={i < violationCount ? styles.dotActive : styles.dotInactive}>●</span>
+              ))}
+            </span>
+          </div>
+          <p className={styles.cheatReason}>
+            <strong>{lastViolationReason}</strong>
+          </p>
+          <p className={styles.cheatWarningText}>
+            {violationCount === 2 ? (
+              <strong className={styles.finalWarningText}>
+                🚨 FINAL HARD WARNING! One more violation will immediately terminate your viva session and flag your evaluation report.
+              </strong>
+            ) : (
+              "Copy-pasting answers or switching tabs during a Viva simulation is strictly monitored to ensure evaluation integrity."
+            )}
+          </p>
+          <div className={styles.cheatActions}>
+            <Button variant="accent" onClick={dismissWarningModal}>
+              I Understand &amp; Resume Viva ▸
+            </Button>
+          </div>
         </div>
       </Modal>
     </div>
