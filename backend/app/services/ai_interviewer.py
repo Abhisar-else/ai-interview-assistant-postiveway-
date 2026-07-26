@@ -51,5 +51,9 @@ def generate_next_question(
         user_prompt = f"""The candidate just answered: "{last_answer}"
 Decide whether to (a) ask a natural follow-up that probes deeper on this answer, or (b) move to a new topic appropriate for the role/difficulty. Then output only the next question — no preamble, no labels."""
 
-    response = call_llm(system_prompt, user_prompt)
+    response = call_llm(system_prompt, user_prompt, fallback_context={
+            "interview_type": interview_type,
+            "job_role": job_role,
+            "turn_index": sum(1 for t in transcript if t.get("role") == "ai"),
+        },)
     return response.replace("Interviewer:", "").replace("Question:", "").strip()
