@@ -4,154 +4,213 @@ An intelligent, full-stack platform designed to help candidates conquer job inte
 
 ---
 
+## 📋 Table of Contents
+
+- [Key Features](#-key-features)
+- [Tech Stack](#-tech-stack)
+- [Unified Project Architecture](#-unified-project-architecture)
+- [Environment Variables](#-environment-variables)
+- [Local Installation & Setup](#-local-installation--setup)
+- [Running the Application](#-running-the-application)
+- [Testing](#-testing)
+- [Security & License](#-security--license)
+
+---
+
 ## ✨ Key Features
 
 ### 👤 For Candidates
-*   **Resume Grounding:** Upload a PDF resume; AI extracts skills, projects, and experience to personalize every question.
+*   **Resume Grounding:** Upload a PDF resume; AI extracts skills, projects, and experience using `pdfplumber` to personalize every question.
 *   **Adaptive Chat Interface:** A realistic, turn-based interview experience where the AI probes deeper based on your previous answers.
 *   **Multi-Mode Preparation:**
-    *   **Technical Round:** Concepts, system design, and architecture.
+    *   **Technical Round:** Architecture, system design, and deep technical concepts.
     *   **Coding Round:** Hands-on algorithm and data structure challenges with monospace code rendering.
-    *   **HR / Behavioral:** Culture-fit, motivation, and situational questions.
-    *   **Mixed:** A balanced blend of all the above.
-*   **Company-Specific Training:** Configure simulations for specific targets like Google, Amazon, or local startups.
-*   **Performance Analytics:** Detailed reports including:
-    *   **ATS Resume Match:** Real-time feedback on how your resume aligns with the target role.
+    *   **HR / Behavioral:** Culture-fit, situational questions, and career motivation.
+    *   **Mixed:** A balanced blend of all interview types.
+*   **Interview Focus Guard:**
+    *   **Tab Switch Tracking:** Detects visibility changes (`⚠ Focus lost ×N`) if a user leaves the active interview window.
+    *   **Navigation Guarding:** Soft-warns on accidental in-app sidebar clicks or window closure.
+    *   **Session Resumption:** Progress auto-saves per turn; safely leave and resume anytime from the Dashboard.
+*   **Voice Mode:** Integrated Web Speech API (`SpeechRecognition` dictation & `SpeechSynthesis` audio output).
+*   **Performance Analytics:** Detailed radial performance reports including:
     *   **Core Metrics:** Technical Accuracy, Communication Clarity, Problem Solving Depth, and Confidence.
     *   **Qualitative Feedback:** Specific strengths, areas for improvement, and recommended study topics.
-*   **Score Trends:** Track your progress over time with visual performance charts on your dashboard.
-*   **Profile Management:** Manage your contact details and identity securely.
+*   **Score Trends:** Visual performance tracking across completed rehearsal sessions.
 
 ### 🛡️ For Admins
 *   **Management Dashboard:** High-level metrics on system usage, average performance, and popular roles.
-*   **Global History:** View and audit every interview session conducted on the platform.
-*   **Detailed Report Viewer:** Access the full AI-generated performance report for any candidate session.
-*   **Category CRUD:** Manage the available job roles, difficulty levels, and interview types available to candidates.
+*   **Global Audit History:** View and audit all candidate interview sessions.
+*   **Category CRUD:** Manage available job roles, difficulty levels, and interview types.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-| :--- | :--- |
-| **Frontend** | React.js (Vite), Tailwind CSS, Headless UI |
-| **Backend** | FastAPI (Python 3.10+), SQLAlchemy (ORM) |
-| **Database** | PostgreSQL |
-| **AI** | Google Gemini API (or OpenAI GPT-4o) |
-| **Testing** | Vitest (Frontend), Pytest (Backend) |
+| Layer | Technology | Key Dependencies |
+| :--- | :--- | :--- |
+| **Frontend** | React 18 (Vite) | React Router v6, Axios, Vanilla CSS Modules, Design Tokens (`index.css`) |
+| **Backend** | FastAPI (Python 3.10+) | SQLAlchemy 2.0 (ORM), Pydantic v2, Pydantic-Settings, `pdfplumber` |
+| **Database** | PostgreSQL 14+ | `psycopg2-binary` |
+| **AI / LLM** | Google Gen AI SDK | `google-genai` (v2.14+) using `gemini-3.5-flash` (Supports new `AQ.` format keys) |
+| **Authentication**| JWT & Password Hashing | `python-jose` (HS256), `passlib` with `bcrypt` |
+| **Testing** | Automated Test Suites | Pytest (Backend, 7/7 test cases), Vitest (Frontend) |
+
+---
+
+## 📁 Unified Project Architecture
+
+```text
+reactfrontend/
+├── ai-interview/                  # React Single-Page Application (Frontend)
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── dashboard/        # ScoreTrend charts & metrics
+│   │   │   ├── interview/        # ChatBubble, QuestionSpotlight, ThinkingMeter
+│   │   │   ├── layout/           # AppShell, ProtectedRoute
+│   │   │   ├── needle/           # ConfidenceNeedle canvas visualization
+│   │   │   ├── resume/           # ResumeUpload dropzone
+│   │   │   └── ui/               # Badge, Button, Card, Input, Modal
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx   # Global user auth & token management
+│   │   ├── hooks/
+│   │   │   ├── useInterviewGuard.js # Focus guard (tab switch & nav interception)
+│   │   │   └── useVoice.js       # Speech recognition & synthesis
+│   │   ├── pages/                # LoginPage, RegisterPage, DashboardPage, InterviewSetupPage, InterviewPage, ReportPage, AdminDashboardPage
+│   │   ├── services/             # api.js dispatcher (Real vs Mock)
+│   │   ├── index.css             # Root design system tokens
+│   │   └── App.jsx               # Router & route protections
+│   ├── public/                   # Static assets & icons
+│   └── vite.config.js            # Vite build configuration
+│
+├── backend/                       # FastAPI Server (Backend)
+│   ├── app/
+│   │   ├── main.py               # FastAPI initialization & middleware
+│   │   ├── core/                 # Config (pydantic-settings), DB session, Security
+│   │   ├── models/               # SQLAlchemy models (User, Admin, Resume, Session, Report, Category)
+│   │   ├── schemas/              # Pydantic schemas
+│   │   ├── services/             # Business logic (ai_interviewer, evaluator, llm, resume_parser)
+│   │   └── routes/               # Routes (auth, candidate, interview, categories, admin)
+│   ├── migrations/               # SQL database migration scripts
+│   ├── tests/                    # Pytest test suite (7/7 tests passing)
+│   └── requirements.txt          # Python dependencies
+│
+├── schema.sql                     # PostgreSQL Base Schema
+├── PRD.md                        # Product Requirements Document
+└── TASKS.md                       # Implementation status & task roadmap
+```
+
+---
+
+## ⚙️ Environment Variables
+
+### 1. Backend (`backend/.env`)
+```ini
+DATABASE_URL=postgresql://postgres:password@localhost:5432/interview_simulator
+JWT_SECRET=32_byte_super_secure_random_hex_secret
+JWT_ALGORITHM=HS256
+JWT_EXPIRE_MINUTES=1440
+GEMINI_API_KEY=AQ.Ab8RN6...  # Google AI Studio API Key (AQ. or AIza format)
+GEMINI_MODEL=gemini-3.5-flash
+FRONTEND_ORIGIN=http://localhost:5173
+```
+
+### 2. Frontend (`ai-interview/.env`)
+```ini
+VITE_USE_MOCK=false
+VITE_API_URL=http://localhost:8000/api
+```
 
 ---
 
 ## 🚀 Local Installation & Setup
 
 ### 1. Prerequisites
-*   Node.js (v18+)
-*   Python (v3.10+)
-*   PostgreSQL 14+
+- **Node.js**: v18+
+- **Python**: v3.10+
+- **PostgreSQL**: 14+
 
 ### 2. Database Initialization
 ```bash
-# Create the database
+# Create PostgreSQL database
 psql -U postgres -c "CREATE DATABASE interview_simulator;"
 
-# Run the schema
+# Initialize schema
 psql -U postgres -d interview_simulator -f schema.sql
 ```
 
-### Existing Database Upgrade
-For a database created before `interview_reports.session_id` became unique,
-apply this one-time migration before deploying the current backend:
-
+#### Idempotent Schema Migration (for existing databases)
+If your database was created before `session_id` became unique on `interview_reports`:
 ```bash
 psql "$DATABASE_URL" -f backend/migrations/20260726_add_interview_report_session_unique.sql
 ```
-
-The migration is safe to rerun. It stops if duplicate reports already exist for
-one session, so resolve those records deliberately before trying again.
 
 ### 3. Backend Setup
 ```bash
 cd backend
 
-# Create & activate virtual environment
+# Create virtual environment
 python -m venv venv
-source venv/bin/activate # Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Configure Environment
+# Create .env from template
 cp .env.example .env
-# Edit .env and add your GEMINI_API_KEY and DATABASE_URL
 ```
 
 ### 4. Frontend Setup
 ```bash
 cd ai-interview
+
+# Install npm packages
 npm install
 
-# Configure Environment
-echo "VITE_API_URL=http://localhost:8000/api" > .env
+# Create .env from template
+cp .env.example .env
 ```
 
 ---
 
 ## 🏃 Running the Application
 
-**Start Backend (Terminal 1):**
+**Start Backend API Server (Terminal 1):**
 ```bash
 cd backend
-uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload
 ```
+*API interactive documentation available at: `http://localhost:8000/docs`*
 
-**Start Frontend (Terminal 2):**
+**Start Frontend Development Server (Terminal 2):**
 ```bash
 cd ai-interview
 npm run dev
 ```
-The app will be live at `http://localhost:5173`.
+*Web Application live at: `http://localhost:5173`*
 
 ---
 
 ## 🧪 Testing
 
-This project follows strict TDD principles and includes comprehensive test suites.
-
-**Frontend Tests:**
-```bash
-cd ai-interview
-npm test
-```
-
-**Backend Tests:**
+### Backend Test Suite (Pytest)
 ```bash
 cd backend
 pytest
 ```
+*Runs all 7 test suites covering auth flow, admin access, interview completion, database migrations, and fallback question variety.*
 
----
-
-## 📁 Project Structure
-
-```text
-├── ai-interview/          # React Frontend (Vite + Tailwind)
-│   ├── src/               # UI components, pages, context, and API services
-│   ├── tests/             # Vitest test suites
-│   └── vite.config.js     # Testing and build configuration
-├── backend/               # FastAPI Backend
-│   ├── app/               # Core logic (routes, models, services, schemas)
-│   ├── tests/             # Pytest backend suites
-│   └── requirements.txt   # Python dependency manifest
-├── schema.sql             # PostgreSQL Database Schema
-├── PRD.md                # Full Product Requirements Document
-└── TASKS.md               # Implementation roadmap and status
+### Frontend Production Build Verification
+```bash
+cd ai-interview
+npx vite build
 ```
 
 ---
 
-## 📝 Usage Notes
-*   **Admin Access:** Insert your first admin user via the provided Python utility or SQL query tool to access management features.
-*   **Security:** This project utilizes JWT authentication and encodes sensitive database credentials for maximum safety.
+## 📝 Security & Offline Support
+
+- **Offline / Key Fallback**: If no LLM API key is configured, the backend gracefully switches to a rotating, context-aware question pool tailored by job role and category.
+- **Security**: JWT authentication, bcrypt password hashing, and parameterized database queries prevent SQL injection and unauthorized access.
 
 ---
 *Built as an independent internship project for PositiveWay Solutions Pvt. Ltd.*
