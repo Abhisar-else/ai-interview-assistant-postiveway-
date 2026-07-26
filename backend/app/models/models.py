@@ -71,7 +71,7 @@ class InterviewReport(Base):
     __tablename__ = "interview_reports"
 
     id = Column(Integer, primary_key=True, index=True)
-    session_id = Column(Integer, ForeignKey("interview_sessions.id", ondelete="CASCADE"), nullable=False, index=True)
+    session_id = Column(Integer, ForeignKey("interview_sessions.id", ondelete="CASCADE"), nullable=False, unique=True, index=True)
     overall_score = Column(Numeric(5, 2), nullable=True)
     ats_score = Column(Numeric(5, 2), nullable=True)
     technical_score = Column(Numeric(5, 2), nullable=True)

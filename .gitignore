@@ -3,6 +3,9 @@
 .env.*
 !.env.example
 *.env.txt
+.env.test
+.env.bak
+.env.real
 
 # --- Python / FastAPI backend ---
 __pycache__/
@@ -11,6 +14,7 @@ __pycache__/
 .venv/
 venv/
 *.db
+*.log
 uploads/
 
 # --- Node / React frontend ---
@@ -22,3 +26,7 @@ dist/
 .vscode/
 .idea/
 .DS_Store
+
+# --- Tooling ---
+*.zip
+*_extracted/
