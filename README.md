@@ -207,6 +207,92 @@ npx vite build
 
 ---
 
+---
+
+## 🌐 Production Deployment Guide
+
+### Option 1: PaaS Cloud Platforms (Recommended & Free Tier Friendly)
+
+#### 1. Database (Supabase / Render / Railway)
+1. Create a Managed PostgreSQL database on [Supabase](https://supabase.com) or [Render](https://render.com).
+2. Copy your connection URL (e.g. `postgresql://user:pass@host:5432/dbname?sslmode=require`).
+3. Run `schema.sql` and the migration script against your cloud DB:
+   ```bash
+   psql "$PROD_DATABASE_URL" -f schema.sql
+   psql "$PROD_DATABASE_URL" -f backend/migrations/20260726_add_interview_report_session_unique.sql
+   ```
+
+#### 2. Backend (Render / Railway / Fly.io)
+1. Create a **Web Service** pointing to your repository's `backend/` folder.
+2. Build Command: `pip install -r requirements.txt`
+3. Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+4. Set Environment Variables:
+   - `DATABASE_URL` = `<your_cloud_postgres_url>`
+   - `GEMINI_API_KEY` = `<your_gemini_api_key>`
+   - `JWT_SECRET` = `<random_32_byte_hex>`
+   - `FRONTEND_ORIGIN` = `https://your-frontend.vercel.app`
+
+#### 3. Frontend (Vercel / Netlify)
+1. Connect your repository to [Vercel](https://vercel.com).
+2. Set Root Directory: `ai-interview`
+3. Build Command: `npm run build` (outputs to `dist`)
+4. Set Environment Variables:
+   - `VITE_USE_MOCK` = `false`
+   - `VITE_API_URL` = `https://your-backend-service.onrender.com/api`
+5. Vercel automatically deploys with HTTPS and global CDN.
+
+---
+
+### Option 2: Linux VPS Deployment (Ubuntu + Nginx + Gunicorn)
+
+#### 1. Server Setup (Ubuntu 22.04 LTS)
+```bash
+sudo apt update && sudo apt install -y python3-pip python3-venv postgresql nginx git
+```
+
+#### 2. Backend Systemd Service
+Create `/etc/systemd/system/interview-backend.service`:
+```ini
+[Unit]
+Description=AI Interview Simulator FastAPI Backend
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/var/www/interview-sim/backend
+ExecStart=/var/www/interview-sim/backend/venv/bin/gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker -b 127.0.0.1:8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+Enable & start: `sudo systemctl enable --now interview-backend`
+
+#### 3. Nginx Reverse Proxy & Static Host
+Create `/etc/nginx/sites-available/interview-sim`:
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
+
+    # Serve React SPA Frontend
+    location / {
+        root /var/www/interview-sim/ai-interview/dist;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Proxy FastAPI Backend Requests
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+Enable site & reload: `sudo ln -s /etc/nginx/sites-available/interview-sim /etc/nginx/sites-enabled/ && sudo systemctl reload nginx`
+
+---
+
 ## 📝 Security & Offline Support
 
 - **Offline / Key Fallback**: If no LLM API key is configured, the backend gracefully switches to a rotating, context-aware question pool tailored by job role and category.
@@ -214,3 +300,4 @@ npx vite build
 
 ---
 *Built as an independent internship project for PositiveWay Solutions Pvt. Ltd.*
+
