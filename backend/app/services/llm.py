@@ -27,17 +27,19 @@ def call_llm(system_prompt: str, user_prompt: str, json_only: bool = False, fall
         except Exception as e:
             logger.error(f"OpenAI API call failed: {type(e).__name__}")
 
-    # 2. Try Gemini API
+    # 2. Try Gemini API (new google-genai SDK)
     if settings.GEMINI_API_KEY:
         try:
-            import google.generativeai as genai
-            genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = genai.GenerativeModel(settings.GEMINI_MODEL)
+            from google import genai
+            client = genai.Client(api_key=settings.GEMINI_API_KEY)
             full_prompt = f"SYSTEM INSTRUCTIONS:\n{system_prompt}\n\nUSER PROMPT:\n{user_prompt}"
-            response = model.generate_content(full_prompt)
+            response = client.models.generate_content(
+                model=settings.GEMINI_MODEL,
+                contents=full_prompt,
+            )
             return response.text.strip()
         except Exception as e:
-            logger.error(f"Gemini API call failed: {type(e).__name__}")
+            logger.error(f"Gemini API call failed: {type(e).__name__}: {e}")
 
     # 3. Fallback intelligent mock response (for offline development without keys)
     logger.warning("No valid LLM API key provided. Using fallback AI simulation response.")

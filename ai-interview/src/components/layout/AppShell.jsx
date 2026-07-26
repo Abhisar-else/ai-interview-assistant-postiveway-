@@ -1,16 +1,60 @@
-import { useState } from 'react';
-import { NavLink, useNavigate, Outlet } from 'react-router-dom';
+import { useState, useCallback } from 'react';
+import { NavLink, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import Modal from '../ui/Modal';
+import Button from '../ui/Button';
 import styles from './AppShell.module.css';
+
+/**
+ * Detects if the current pathname is an active interview session.
+ * Matches /interview/:id but NOT /interview/setup or /interview/:id/report.
+ */
+function isInterviewActive(pathname) {
+  return /^\/interview\/\d+$/.test(pathname);
+}
 
 export default function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [pendingNavTarget, setPendingNavTarget] = useState(null);
   const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const interviewActive = isInterviewActive(location.pathname);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  /**
+   * Guards a navigation action — if interview is active,
+   * shows confirm modal instead of navigating immediately.
+   */
+  const guardedNavigate = useCallback((target, e) => {
+    if (interviewActive) {
+      if (e) e.preventDefault();
+      setPendingNavTarget(target);
+      setShowLeaveModal(true);
+    }
+    // If not active, NavLink handles navigation normally
+  }, [interviewActive]);
+
+  /** User confirmed leaving the interview */
+  const confirmLeave = () => {
+    setShowLeaveModal(false);
+    if (pendingNavTarget === '__logout__') {
+      handleLogout();
+    } else if (pendingNavTarget) {
+      navigate(pendingNavTarget);
+    }
+    setPendingNavTarget(null);
+  };
+
+  const cancelLeave = () => {
+    setShowLeaveModal(false);
+    setPendingNavTarget(null);
   };
 
   const navItems = isAdmin
@@ -46,7 +90,18 @@ export default function AppShell() {
             <span className={styles.userName}>{user?.name || 'User'}</span>
             {isAdmin && <span className={`${styles.adminBadge} data-text`}>ADMIN</span>}
           </div>
-          <button className={styles.logoutBtn} onClick={handleLogout}>
+          <button
+            className={styles.logoutBtn}
+            onClick={(e) => {
+              if (interviewActive) {
+                e.preventDefault();
+                setPendingNavTarget('__logout__');
+                setShowLeaveModal(true);
+              } else {
+                handleLogout();
+              }
+            }}
+          >
             Sign out
           </button>
         </div>
@@ -62,9 +117,12 @@ export default function AppShell() {
                 to={item.to}
                 end={item.to === '/' || item.to === '/admin'}
                 className={({ isActive }) =>
-                  `${styles.navItem} ${isActive ? styles.navItemActive : ''}`
+                  `${styles.navItem} ${isActive ? styles.navItemActive : ''} ${interviewActive ? styles.navItemGuarded : ''}`
                 }
-                onClick={() => setSidebarOpen(false)}
+                onClick={(e) => {
+                  setSidebarOpen(false);
+                  guardedNavigate(item.to, e);
+                }}
               >
                 <span className={styles.navIcon}>{item.icon}</span>
                 {item.label}
@@ -88,6 +146,27 @@ export default function AppShell() {
           </div>
         </main>
       </div>
+
+      {/* Leave Interview Confirmation Modal */}
+      <Modal
+        isOpen={showLeaveModal}
+        onClose={cancelLeave}
+        title="Leave Interview?"
+      >
+        <p className={styles.leaveModalText}>
+          Your interview is still in progress. Your progress is
+          <strong> automatically saved</strong> and you can resume later
+          from the Dashboard.
+        </p>
+        <div className={styles.leaveModalActions}>
+          <Button variant="ghost" onClick={cancelLeave}>
+            Stay in Interview
+          </Button>
+          <Button variant="accent" onClick={confirmLeave}>
+            Leave &amp; Save Progress ▸
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

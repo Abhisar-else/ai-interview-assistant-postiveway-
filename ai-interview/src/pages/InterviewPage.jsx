@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import * as api from '../services/api';
 import useVoice from '../hooks/useVoice';
+import useInterviewGuard from '../hooks/useInterviewGuard';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import Modal from '../components/ui/Modal';
@@ -27,6 +28,10 @@ export default function InterviewPage() {
 
   const { supported, isListening, speak, startListening, stopListening, cancelSpeech } = useVoice();
   const historyEndRef = useRef(null);
+
+  // Focus guard — active when session is in progress (not completed/loading)
+  const guardActive = !loading && session && session.status !== 'completed';
+  const { tabAwayCount } = useInterviewGuard(guardActive);
 
   // Load session data
   useEffect(() => {
@@ -165,6 +170,11 @@ export default function InterviewPage() {
               <input type="checkbox" checked={voiceEnabled} onChange={toggleVoice} />
               <span className={styles.voiceLabel}>Voice Mode</span>
             </label>
+          )}
+          {tabAwayCount > 0 && (
+            <span className={styles.focusWarning} title={`You switched tabs ${tabAwayCount} time(s) during this interview`}>
+              ⚠ Focus lost ×{tabAwayCount}
+            </span>
           )}
           <div className={`${styles.timer} data-text`}>
             ⏱ {formatTimer(elapsedSeconds)}
