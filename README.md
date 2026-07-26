@@ -58,6 +58,17 @@ psql -U postgres -c "CREATE DATABASE interview_simulator;"
 psql -U postgres -d interview_simulator -f schema.sql
 ```
 
+### Existing Database Upgrade
+For a database created before `interview_reports.session_id` became unique,
+apply this one-time migration before deploying the current backend:
+
+```bash
+psql "$DATABASE_URL" -f backend/migrations/20260726_add_interview_report_session_unique.sql
+```
+
+The migration is safe to rerun. It stops if duplicate reports already exist for
+one session, so resolve those records deliberately before trying again.
+
 ### 3. Backend Setup
 ```bash
 cd backend
