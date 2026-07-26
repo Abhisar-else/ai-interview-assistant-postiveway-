@@ -1,5 +1,7 @@
 import os
 import uuid
+import logging
+import bleach
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
@@ -10,7 +12,20 @@ from app.models.models import Resume, User
 from app.schemas.schemas import ResumeOut, UserOut, ProfileUpdate
 from app.services.resume_parser import parse_resume
 
+logger = logging.getLogger("uvicorn.error")
 router = APIRouter(prefix="", tags=["Candidate & Resume"])
+
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB limit
+
+def sanitize_parsed_json(data: dict) -> dict:
+    """Helper to clean all strings in the parsed resume JSON."""
+    if isinstance(data, dict):
+        return {k: sanitize_parsed_json(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [sanitize_parsed_json(v) for v in data]
+    elif isinstance(data, str):
+        return bleach.clean(data, tags=[], strip=True)
+    return data
 
 @router.get("/profile", response_model=UserOut)
 def get_profile(
@@ -33,9 +48,10 @@ def update_profile(
         raise HTTPException(status_code=404, detail="User not found")
 
     if data.name is not None:
-        user.name = data.name
+        # Sanitize input to prevent Stored XSS
+        user.name = bleach.clean(data.name, tags=[], strip=True)
     if data.phone is not None:
-        user.phone = data.phone
+        user.phone = bleach.clean(data.phone, tags=[], strip=True)
 
     db.commit()
     db.refresh(user)
@@ -47,23 +63,37 @@ async def upload_resume(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    print(f"DEBUG: Upload request received from user {current_user['id']}")
+    # 1. Size Validation (DoS Prevention)
+    # Seek to end to get size
+    file.file.seek(0, os.SEEK_END)
+    file_size = file.file.tell()
+    file.file.seek(0)
+
+    if file_size > MAX_FILE_SIZE:
+        raise HTTPException(status_code=413, detail="File too large (Max 10MB)")
+
+    # 2. Content Type / Magic Number Validation
     if not file.filename.endswith(".pdf"):
-        print(f"DEBUG: Rejected file {file.filename} - not a PDF")
         raise HTTPException(status_code=400, detail="Only PDF format files are supported.")
+
+    header = await file.read(4)
+    await file.seek(0)
+    if header != b'%PDF':
+        raise HTTPException(status_code=400, detail="Invalid PDF content")
 
     try:
         os.makedirs(settings.RESUME_UPLOAD_DIR, exist_ok=True)
         safe_filename = f"user_{current_user['id']}_{uuid.uuid4().hex}.pdf"
         file_path = os.path.join(settings.RESUME_UPLOAD_DIR, safe_filename)
 
-        print(f"DEBUG: Saving file to {file_path}")
+        content = await file.read()
         with open(file_path, "wb") as f:
-            content = await file.read()
             f.write(content)
 
-        print(f"DEBUG: Starting PDF parsing...")
         raw_text, parsed_json = parse_resume(file_path)
+
+        # Sanitize LLM output to prevent XSS in Admin views
+        parsed_json = sanitize_parsed_json(parsed_json)
 
         # STRICT VALIDATION: Reject if no interview-relevant info is found
         skills = parsed_json.get("skills", [])
@@ -71,7 +101,6 @@ async def upload_resume(
         projects = parsed_json.get("projects", [])
 
         if not skills or (not experience and not projects):
-            print("DEBUG: Rejected - Resume missing skills or work history")
             # Clean up the file
             if os.path.exists(file_path):
                 os.remove(file_path)
@@ -80,22 +109,21 @@ async def upload_resume(
                 detail="Resume Rejected: No interview-relevant information (skills, experience, or projects) detected in PDF."
             )
 
-        print(f"DEBUG: Parsing complete. Skills found: {len(skills)}")
-
-        # Delete existing resume for user if any
-        db.query(Resume).filter(Resume.user_id == current_user["id"]).delete()
-
+        # ATOMIC SAVE: Record new resume before deleting old one
         new_resume = Resume(
             user_id=current_user["id"],
             file_path=file_path,
             parsed_text=raw_text,
             parsed_json=parsed_json
         )
+
+        # Delete existing resume for user if any
+        db.query(Resume).filter(Resume.user_id == current_user["id"]).delete()
+
         db.add(new_resume)
         db.commit()
         db.refresh(new_resume)
 
-        print(f"DEBUG: Resume record saved to DB with ID {new_resume.id}")
         return {
             "id": new_resume.id,
             "user_id": new_resume.user_id,
@@ -104,10 +132,11 @@ async def upload_resume(
             "uploaded_at": new_resume.uploaded_at
         }
     except Exception as e:
-        print(f"DEBUG: ERROR during upload: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        logger.error(f"Critical upload failure for user {current_user['id']}: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="An internal error occurred while processing your resume. Please try again or contact support."
+        )
 
 @router.get("/resume")
 @router.get("/resume/status")

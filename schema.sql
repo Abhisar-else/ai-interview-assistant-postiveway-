@@ -52,7 +52,7 @@ CREATE TABLE interview_sessions (
 
 CREATE TABLE interview_reports (
     id SERIAL PRIMARY KEY,
-    session_id INTEGER REFERENCES interview_sessions(id) ON DELETE CASCADE,
+    session_id INTEGER REFERENCES interview_sessions(id) ON DELETE CASCADE UNIQUE,
     overall_score NUMERIC(5,2),
     ats_score NUMERIC(5,2),
     technical_score NUMERIC(5,2),
@@ -67,4 +67,6 @@ CREATE TABLE interview_reports (
 
 -- Indexes for performance
 CREATE INDEX idx_sessions_user ON interview_sessions(user_id);
+CREATE INDEX idx_sessions_job_role ON interview_sessions(job_role);
+CREATE INDEX idx_sessions_type ON interview_sessions(interview_type);
 CREATE INDEX idx_reports_session ON interview_reports(session_id);

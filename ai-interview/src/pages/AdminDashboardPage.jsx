@@ -175,23 +175,27 @@ const handleViewReport = async (sessionId) => {
         <div className={styles.tabContent}>
           {/* Top Metric Cards */}
           <div className={styles.metricsGrid}>
-            <Card padding="md">
-              <span className={styles.metricLabel}>Total Candidates</span>
-              <span className={`${styles.metricVal} display-text`}>{stats?.total_users}</span>
-              <span className={styles.metricTrend}>Active Accounts</span>
+            <Card padding="lg">
+              <span className={styles.metricLabel}>Active Candidates</span>
+              <div className="flex items-baseline gap-2">
+                <span className={`${styles.metricVal} display-text`}>{stats?.total_users}</span>
+                <span className={styles.metricTrend}>↑ 12%</span>
+              </div>
             </Card>
 
-            <Card padding="md">
+            <Card padding="lg">
               <span className={styles.metricLabel}>Total Rehearsals</span>
-              <span className={`${styles.metricVal} display-text`}>{stats?.total_interviews}</span>
-              <span className={styles.metricTrend}>Completed & In Progress</span>
+              <div className="flex items-baseline gap-2">
+                <span className={`${styles.metricVal} display-text`}>{stats?.total_interviews}</span>
+                <span className={styles.metricTrend}>All-time</span>
+              </div>
             </Card>
 
-            <Card padding="md">
-              <span className={styles.metricLabel}>Average System Score</span>
-              <div className={styles.avgScoreRow}>
-                <span className={`${styles.metricVal} data-text`}>{stats?.avg_score}/100</span>
-                <Badge variant="green">Healthy</Badge>
+            <Card padding="lg">
+              <span className={styles.metricLabel}>System Health Score</span>
+              <div className="flex items-baseline gap-2">
+                <span className={`${styles.metricVal} display-text`}>{stats?.avg_score}</span>
+                <Badge variant="green">Optimal</Badge>
               </div>
             </Card>
           </div>
